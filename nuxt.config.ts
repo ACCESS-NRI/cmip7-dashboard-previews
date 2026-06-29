@@ -27,6 +27,8 @@ export default defineNuxtConfig({
         process.env.NUXT_PUBLIC_CMIP7_PARQUET_SOURCE ?? "s3://gm-tas/gm_tas.pq",
       cmip7ParquetFileName:
         process.env.NUXT_PUBLIC_CMIP7_PARQUET_FILE_NAME ?? "gm_tas.pq",
+      // Payu telemetry endpoint (tracking-services API).
+      payuCmip7ApiUrl: process.env.NUXT_PUBLIC_PAYU_CMIP7_API_URL ?? "",
     },
   },
   posthogConfig: {
