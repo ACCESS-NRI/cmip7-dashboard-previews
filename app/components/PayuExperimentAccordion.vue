@@ -75,7 +75,7 @@
             'grid w-full min-w-0 items-center gap-x-4 rounded-none border-b border-gray-100 px-5 py-2 text-left [grid-template-columns:1fr_11rem_4rem_1.25rem] dark:border-gray-700',
           label: 'contents',
           trailingIcon:
-            'size-5 justify-self-end shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-180'
+            'size-5 justify-self-end shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-180',
         }"
         data-test="payu-accordion"
       >
