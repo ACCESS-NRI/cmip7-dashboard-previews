@@ -1,3 +1,6 @@
+import { loadExperimentConfig } from "./experimentConfig";
+import type { ExperimentConfig } from "./experimentConfig";
+
 /** Raw shape produced by the Payu experiment API / CLI output. */
 export interface PayuExperimentRaw {
   experiment_name: string;
@@ -5,7 +8,7 @@ export interface PayuExperimentRaw {
   experiment_model_start_time: string;
   experiment_model_current_time: string;
   /** Direct service-units figure; may be absent while a run is in progress. */
-  experiment_service_units_used?: number | null;
+  experiment_service_units?: number | null;
   /** Fallback CPU-time value used when service units are not yet calculated. */
   experiment_resources_used_cput?: number | null;
   /** Any additional fields forwarded transparently to the UI. */
@@ -19,6 +22,9 @@ export interface PayuExperiment {
   modelStartTime: string;
   modelCurrentTime: string;
   serviceUnitsDisplay: string;
+  yearsRun: number;
+  expectedYearsRun: number | null;
+  esgfPublished: boolean | null;
   /** All original key/value pairs for the expanded details panel. */
   details: Record<string, unknown>;
 }
@@ -33,8 +39,8 @@ export interface PayuExperiment {
  * component.
  */
 export function formatServiceUnits(raw: PayuExperimentRaw): string {
-  if (raw.experiment_service_units_used != null) {
-    return String(raw.experiment_service_units_used);
+  if (raw.experiment_service_units != null) {
+    return String(raw.experiment_service_units);
   }
   if (raw.experiment_resources_used_cput != null) {
     return `${raw.experiment_resources_used_cput} (CPU-T)`;
@@ -42,52 +48,67 @@ export function formatServiceUnits(raw: PayuExperimentRaw): string {
   return "—";
 }
 
+/** Model years run, derived from the start/current model time years. */
+export function calculateYearsRun(raw: PayuExperimentRaw): number {
+  const startYear = parseInt(raw.experiment_model_start_time.slice(0, 4), 10);
+  const currentYear = parseInt(
+    raw.experiment_model_current_time.slice(0, 4),
+    10,
+  );
+  return currentYear - startYear;
+}
+
 export function normalizePayuExperiment(
-  raw: PayuExperimentRaw,
+  configEntry: ExperimentConfig,
+  payuData: PayuExperimentRaw | undefined,
 ): PayuExperiment {
   return {
-    name: raw.experiment_name,
-    uuid: raw.experiment_uuid,
-    modelStartTime: raw.experiment_model_start_time,
-    modelCurrentTime: raw.experiment_model_current_time,
-    serviceUnitsDisplay: formatServiceUnits(raw),
-    details: { ...raw },
+    name: configEntry.name,
+    uuid: configEntry.uuid,
+    modelStartTime: payuData?.experiment_model_start_time ?? "—",
+    modelCurrentTime: payuData?.experiment_model_current_time ?? "—",
+    serviceUnitsDisplay: payuData ? formatServiceUnits(payuData) : "—",
+    yearsRun: payuData ? calculateYearsRun(payuData) : 0,
+    expectedYearsRun: configEntry.expected_years_run,
+    esgfPublished: configEntry.esgf_published ?? null,
+    details: payuData ? { ...payuData } : {},
   };
 }
 
 // ---------------------------------------------------------------------------
-// Static mock data (first iteration; replace with real fetch when ready)
+// Loader
 // ---------------------------------------------------------------------------
 
-const MOCK_PAYU_EXPERIMENTS: PayuExperimentRaw[] = [
-  {
-    experiment_name: "Ndep2-PI-CNP-concentrations",
-    experiment_uuid: "e523e199-80f6-4ca6-b84a-e513a16f2029",
-    experiment_model_start_time: "0101-01-01T00:00:00",
-    experiment_model_current_time: "0275-01-01T00:00:00",
-    experiment_service_units_used: 1,
-  },
-  {
-    experiment_name: "historical-1pctCO2-nudged",
-    experiment_uuid: "a1b2c3d4-1234-5678-abcd-ef0123456789",
-    experiment_model_start_time: "1850-01-01T00:00:00",
-    experiment_model_current_time: "1920-06-01T00:00:00",
-    experiment_service_units_used: null,
-    experiment_resources_used_cput: 342.5,
-  },
-  {
-    experiment_name: "piControl-spun-up",
-    experiment_uuid: "f9e8d7c6-fedc-ba98-7654-321012345678",
-    experiment_model_start_time: "0001-01-01T00:00:00",
-    experiment_model_current_time: "0050-01-01T00:00:00",
-    experiment_service_units_used: 0,
-  },
-];
+/**
+ * Build the dashboard experiment list. The experiment-config.json is the source
+ * of truth for which experiments to show (including ones that have not run yet);
+ * live payu telemetry from the tracking-services API is matched in by UUID.
+ *
+ * The API endpoint is supplied by the caller (from
+ * `useRuntimeConfig().public.payuCmip7ApiUrl`) so the loader stays unit-testable.
+ */
+export async function loadPayuExperiments(
+  apiUrl: string,
+): Promise<PayuExperiment[]> {
+  if (!apiUrl) {
+    throw new Error("payuCmip7ApiUrl is not configured");
+  }
 
-// ---------------------------------------------------------------------------
-// Loader (async interface preserved for future API migration)
-// ---------------------------------------------------------------------------
+  const [response, config] = await Promise.all([
+    fetch(apiUrl),
+    loadExperimentConfig().catch(() => [] as ExperimentConfig[]),
+  ]);
 
-export async function loadPayuExperiments(): Promise<PayuExperiment[]> {
-  return MOCK_PAYU_EXPERIMENTS.map(normalizePayuExperiment);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch experiments: ${response.status}`);
+  }
+  const payuData: PayuExperimentRaw[] = await response.json();
+
+  // Iterate over config (source of truth), look up payu telemetry by UUID.
+  return config.map((configEntry) => {
+    const telemetry = payuData.find(
+      (p) => p.experiment_uuid === configEntry.uuid,
+    );
+    return normalizePayuExperiment(configEntry, telemetry);
+  });
 }

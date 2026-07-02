@@ -14,13 +14,17 @@ const statusCards = [
   { label: "Charts", value: "Chart.js-ready" },
 ];
 
+const config = useRuntimeConfig();
+
 const payuExperiments = ref<PayuExperiment[]>([]);
 const payuLoading = ref(true);
 const payuError = ref<string | null>(null);
 
 onMounted(async () => {
   try {
-    payuExperiments.value = await loadPayuExperiments();
+    payuExperiments.value = await loadPayuExperiments(
+      config.public.payuCmip7ApiUrl as string,
+    );
   } catch (err) {
     payuError.value =
       err instanceof Error ? err.message : "Failed to load experiments.";
@@ -93,6 +97,20 @@ onMounted(async () => {
       </div>
     </section>
 
+    <div class="mb-12">
+      <ExperimentSummaryCards
+        :experiments="payuExperiments"
+        :loading="payuLoading"
+        :error="payuError"
+      />
+    </div>
+
+    <PayuExperimentAccordion
+      :experiments="payuExperiments"
+      :loading="payuLoading"
+      :error="payuError"
+    />
+
     <ClientOnly>
       <DummyClimatePlot />
       <template #fallback>
@@ -103,12 +121,6 @@ onMounted(async () => {
         </section>
       </template>
     </ClientOnly>
-
-    <PayuExperimentAccordion
-      :experiments="payuExperiments"
-      :loading="payuLoading"
-      :error="payuError"
-    />
 
     <section
       class="mx-auto mb-12 max-w-2xl space-y-3 rounded-2xl border border-gray-200 bg-white p-5 text-sm leading-relaxed text-gray-600 shadow-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400"
