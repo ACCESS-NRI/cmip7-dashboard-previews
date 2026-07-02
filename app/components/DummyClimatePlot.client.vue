@@ -79,6 +79,7 @@ interface ZoomHandlers {
 }
 
 interface ZoomState {
+  canvas?: HTMLCanvasElement;
   originalX?: { min?: unknown; max?: unknown };
   originalY?: { min?: unknown; max?: unknown };
   panStart?: {
@@ -99,6 +100,7 @@ const axisZoomPlugin: Plugin<"line"> = {
   afterInit(chart) {
     const state = getZoomState(chart);
     const canvas = chart.canvas;
+    state.canvas = canvas;
 
     state.handlers = {
       wheel: (event) => handleWheelZoom(chart, event),
@@ -129,9 +131,15 @@ const axisZoomPlugin: Plugin<"line"> = {
     const state = zoomStates.get(chart);
     if (!state?.handlers) return;
 
-    chart.canvas.removeEventListener("wheel", state.handlers.wheel);
-    chart.canvas.removeEventListener("pointerdown", state.handlers.pointerDown);
-    chart.canvas.removeEventListener("dblclick", state.handlers.doubleClick);
+    // Chart.js nulls `chart.canvas` during destroy, so use the reference
+    // captured in afterInit. The window listeners must always be removed —
+    // otherwise they leak and fire on a destroyed chart after navigation.
+    const canvas = state.canvas;
+    if (canvas) {
+      canvas.removeEventListener("wheel", state.handlers.wheel);
+      canvas.removeEventListener("pointerdown", state.handlers.pointerDown);
+      canvas.removeEventListener("dblclick", state.handlers.doubleClick);
+    }
     window.removeEventListener("pointermove", state.handlers.pointerMove);
     window.removeEventListener("pointerup", state.handlers.pointerUp);
     zoomStates.delete(chart);
@@ -268,8 +276,8 @@ function handlePointerDown(chart: Chart, event: PointerEvent): void {
 }
 
 function handlePointerMove(chart: Chart, event: PointerEvent): void {
-  const state = getZoomState(chart);
-  if (!state.panStart) return;
+  const state = zoomStates.get(chart);
+  if (!state?.panStart) return;
 
   const { left, right, top, bottom } = chart.chartArea;
   const xRange = state.panStart.xMax - state.panStart.xMin;
@@ -293,8 +301,10 @@ function handlePointerMove(chart: Chart, event: PointerEvent): void {
 }
 
 function handlePointerUp(chart: Chart): void {
-  getZoomState(chart).panStart = undefined;
-  chart.canvas.style.cursor = "";
+  const state = zoomStates.get(chart);
+  if (!state) return;
+  state.panStart = undefined;
+  if (chart.canvas) chart.canvas.style.cursor = "";
 }
 
 function resetZoom(chart: Chart): void {
