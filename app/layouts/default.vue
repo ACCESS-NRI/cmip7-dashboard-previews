@@ -4,7 +4,9 @@ import type { NavigationMenuItem } from "@nuxt/ui";
 const route = useRoute();
 
 const items = computed<NavigationMenuItem[]>(() => [
-  { label: "Dashboard", to: "/", active: route.path === "/" },
+  { label: "Dashboard", to: "/", exact: true },
+  // startsWith so the tab stays active on nested entries (/blog/:slug),
+  // which are separate route records from /blog and wouldn't match otherwise.
   { label: "Blog", to: "/blog", active: route.path.startsWith("/blog") },
 ]);
 </script>
