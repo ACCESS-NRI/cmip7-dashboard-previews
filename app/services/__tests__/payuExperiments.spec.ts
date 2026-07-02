@@ -141,7 +141,9 @@ describe("loadPayuExperiments", () => {
   ];
 
   beforeEach(() => {
-    vi.spyOn(experimentConfigModule, "loadExperimentConfig").mockResolvedValue(CONFIG);
+    vi.spyOn(experimentConfigModule, "loadExperimentConfig").mockResolvedValue(
+      CONFIG,
+    );
   });
 
   afterEach(() => {
@@ -152,9 +154,7 @@ describe("loadPayuExperiments", () => {
   const stubFetch = (payuResponse: unknown) =>
     vi.stubGlobal(
       "fetch",
-      vi.fn((url: string) =>
-        Promise.resolve(payuResponse),
-      ),
+      vi.fn((url: string) => Promise.resolve(payuResponse)),
     );
 
   it("iterates config and looks up payu telemetry by UUID", async () => {
