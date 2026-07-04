@@ -57,7 +57,7 @@
         <span
           class="text-center text-xs font-semibold uppercase text-gray-400 dark:text-gray-500"
         >
-          ESGF
+          <Jargon term="ESGF">ESGF</Jargon>
         </span>
         <span aria-hidden="true"></span>
       </div>

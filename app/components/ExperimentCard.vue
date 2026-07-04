@@ -101,7 +101,7 @@ const isIdealised = computed(() => experimentClass.value.id === "idealised");
         :published="experiment.esgfPublished"
         class="text-xs text-gray-500 dark:text-gray-400"
       >
-        ESGF published
+        <Jargon term="ESGF">ESGF</Jargon> published
       </EsgfStatus>
     </div>
   </section>
