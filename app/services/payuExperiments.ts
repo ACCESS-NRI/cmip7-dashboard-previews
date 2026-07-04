@@ -80,9 +80,26 @@ export function normalizePayuExperiment(
 // ---------------------------------------------------------------------------
 
 /**
+ * Live payu telemetry is best-effort: when the API is not configured or
+ * unreachable, the dashboard still shows every experiment from the config,
+ * just without per-run telemetry.
+ */
+async function fetchTelemetry(apiUrl: string): Promise<PayuExperimentRaw[]> {
+  if (!apiUrl) return [];
+  try {
+    const response = await fetch(apiUrl);
+    if (!response.ok) return [];
+    return await response.json();
+  } catch {
+    return [];
+  }
+}
+
+/**
  * Build the dashboard experiment list. The experiment-config.json is the source
- * of truth for which experiments to show (including ones that have not run yet);
- * live payu telemetry from the tracking-services API is matched in by UUID.
+ * of truth for which experiments to show (including ones that have not run yet)
+ * and the only load that can fail; live payu telemetry from the
+ * tracking-services API is matched in by UUID when available.
  *
  * The API endpoint is supplied by the caller (from
  * `useRuntimeConfig().public.payuCmip7ApiUrl`) so the loader stays unit-testable.
@@ -90,19 +107,10 @@ export function normalizePayuExperiment(
 export async function loadPayuExperiments(
   apiUrl: string,
 ): Promise<PayuExperiment[]> {
-  if (!apiUrl) {
-    throw new Error("payuCmip7ApiUrl is not configured");
-  }
-
-  const [response, config] = await Promise.all([
-    fetch(apiUrl),
-    loadExperimentConfig().catch(() => [] as ExperimentConfig[]),
+  const [config, payuData] = await Promise.all([
+    loadExperimentConfig(),
+    fetchTelemetry(apiUrl),
   ]);
-
-  if (!response.ok) {
-    throw new Error(`Failed to fetch experiments: ${response.status}`);
-  }
-  const payuData: PayuExperimentRaw[] = await response.json();
 
   // Iterate over config (source of truth), look up payu telemetry by UUID.
   return config.map((configEntry) => {
