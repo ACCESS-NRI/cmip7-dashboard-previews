@@ -33,7 +33,7 @@ const getGitHubRepositoryUrl = () => {
     }
   }
 
-  return "https://github.com/ACCESS-NRI/cmip7-dashboard";
+  return "https://github.com/ACCESS-NRI/cmip7-dashboard-previews";
 };
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
