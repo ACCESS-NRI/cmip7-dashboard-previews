@@ -8,11 +8,8 @@ useSeoMeta({
     "A lightweight interface for tracking CMIP7 climate model outputs and derived metrics.",
 });
 
-const statusCards = [
-  { label: "App", value: "Nuxt 4 + nuxt-ui" },
-  { label: "Metrics", value: "TCRE-ready" },
-  { label: "Charts", value: "Chart.js-ready" },
-];
+// If you want some sort of default status cards, shove them in here.
+const statusCards = [];
 
 const config = useRuntimeConfig();
 
@@ -105,11 +102,13 @@ onMounted(async () => {
       />
     </div>
 
-    <PayuExperimentAccordion
-      :experiments="payuExperiments"
-      :loading="payuLoading"
-      :error="payuError"
-    />
+    <div class="mb-12">
+      <PayuExperimentAccordion
+        :experiments="payuExperiments"
+        :loading="payuLoading"
+        :error="payuError"
+      />
+    </div>
 
     <ClientOnly>
       <DummyClimatePlot />

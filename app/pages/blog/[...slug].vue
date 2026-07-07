@@ -19,15 +19,6 @@ useSeoMeta({
   title: () => post.value?.title,
   description: () => post.value?.description,
 });
-
-const formatDate = (value?: string) =>
-  value
-    ? new Date(value).toLocaleDateString("en-AU", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      })
-    : "";
 </script>
 
 <template>
@@ -39,20 +30,6 @@ const formatDate = (value?: string) =>
       <UIcon name="i-lucide-arrow-left" /> All updates
     </NuxtLink>
 
-    <article v-if="post">
-      <header class="mb-6">
-        <div
-          v-if="post.date || post.author"
-          class="text-xs uppercase tracking-wide text-gray-400 dark:text-gray-500"
-        >
-          {{ formatDate(post.date as string | undefined) }}
-          <span v-if="post.author"> · {{ post.author }}</span>
-        </div>
-      </header>
-      <ContentRenderer
-        :value="post"
-        class="prose dark:prose-invert max-w-none"
-      />
-    </article>
+    <BlogArticle v-if="post" :post="post" />
   </main>
 </template>
