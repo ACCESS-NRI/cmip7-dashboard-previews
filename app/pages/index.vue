@@ -146,13 +146,17 @@ onMounted(async () => {
       </div>
 
       <template v-if="!payuLoading && !payuError && payuExperiments.length > 0">
-        <!-- Taxonomy explainer: keeps idealised/diagnostic runs from being read
-             as projections (issue #14). Shown where non-specialists browse. -->
-        <ExperimentClassLegend
-          v-if="level < 2"
-          :class-ids="payuExperiments.map((e) => e.experimentClass.id)"
-          class="mb-12"
-        />
+        <!-- Explainers for the two orthogonal axes, side by side: the scientific
+             taxonomy (issue #14) and the CMIP7 participation layers (issue #21).
+             Shown where non-specialists browse. -->
+        <div v-if="level < 2" class="mb-12 grid gap-6 lg:grid-cols-2">
+          <ExperimentClassLegend
+            :class-ids="payuExperiments.map((e) => e.experimentClass.id)"
+          />
+          <ExperimentTierLegend
+            :experiment-tiers="payuExperiments.map((e) => e.tiers)"
+          />
+        </div>
 
         <!-- Big picture/Progress: one card per experiment, reframed by the picker. -->
         <div
@@ -204,7 +208,13 @@ onMounted(async () => {
             class="font-medium text-blue-700 hover:underline dark:text-blue-400"
             >blog</NuxtLink
           >
-          automatically.
+          automatically. New to the terminology? The
+          <NuxtLink
+            to="/glossary"
+            class="font-medium text-blue-700 hover:underline dark:text-blue-400"
+            >glossary</NuxtLink
+          >
+          explains the CMIP7 jargon used across this dashboard.
         </p>
         <div
           class="flex flex-wrap items-center gap-3 border-t border-gray-200 pt-3 dark:border-gray-700"
