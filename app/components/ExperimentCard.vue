@@ -3,7 +3,6 @@ import { computed } from "vue";
 import type { ContentCollectionItem } from "@nuxt/content";
 import { useDetailLevel } from "~/composables/useDetailLevel";
 import type { PayuExperiment } from "~/services/payuExperiments";
-import { classifyExperiment } from "~/services/experimentClass";
 
 const props = defineProps<{
   experiment: PayuExperiment;
@@ -17,9 +16,7 @@ const furtherReading = computed(() => props.post?.furtherReading ?? []);
 
 // Experiment taxonomy (issue #14): idealised runs (e.g. abrupt-4xCO2) are the
 // ones most easily misread as projections, so flag them explicitly.
-const experimentClass = computed(() =>
-  classifyExperiment(props.experiment.name),
-);
+const experimentClass = computed(() => props.experiment.experimentClass);
 const isIdealised = computed(() => experimentClass.value.id === "idealised");
 </script>
 
@@ -37,7 +34,10 @@ const isIdealised = computed(() => experimentClass.value.id === "idealised");
       >
         {{ experiment.name }}
       </h3>
-      <ExperimentClassBadge :name="experiment.name" class="shrink-0" />
+      <ExperimentClassBadge
+        :experiment-class="experiment.experimentClass"
+        class="shrink-0"
+      />
     </header>
 
     <!-- Overview: the explainer's one-liner, expandable to the full article. -->

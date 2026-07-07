@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { mountSuspended } from "@nuxt/test-utils/runtime";
 import ExperimentTotals from "../ExperimentTotals.vue";
 import type { PayuExperiment } from "~/services/payuExperiments";
+import { EXPERIMENT_CLASSES } from "~/services/experimentClass";
 
 function makeExperiment(
   overrides: Partial<PayuExperiment> = {},
@@ -16,6 +17,7 @@ function makeExperiment(
     yearsRun: 50,
     expectedYearsRun: 100,
     esgfPublished: false,
+    experimentClass: EXPERIMENT_CLASSES.historical,
     details: {},
     ...overrides,
   };

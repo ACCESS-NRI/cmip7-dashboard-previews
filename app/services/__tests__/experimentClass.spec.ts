@@ -1,67 +1,45 @@
 import { describe, expect, it } from "vitest";
 import {
-  classifyExperiment,
+  resolveExperimentClass,
   experimentClassesPresent,
 } from "../experimentClass";
 
-describe("classifyExperiment", () => {
-  it("classifies pre-industrial controls as the baseline", () => {
-    expect(classifyExperiment("piControl").id).toBe("baseline");
-    expect(classifyExperiment("esm-piControl").id).toBe("baseline");
+describe("resolveExperimentClass", () => {
+  it("resolves a declared class id to its full definition", () => {
+    expect(resolveExperimentClass("baseline").id).toBe("baseline");
+    expect(resolveExperimentClass("historical").id).toBe("historical");
+    expect(resolveExperimentClass("idealised").id).toBe("idealised");
+    expect(resolveExperimentClass("projection").id).toBe("projection");
   });
 
-  it("classifies historical and amip runs as historical", () => {
-    expect(classifyExperiment("historical").id).toBe("historical");
-    expect(classifyExperiment("esm-historical").id).toBe("historical");
-    expect(classifyExperiment("amip").id).toBe("historical");
-  });
-
-  it("classifies 4xCO2 / 1pctCO2 / flat10 runs as idealised", () => {
-    for (const name of [
-      "abrupt-4xCO2",
-      "1pctCO2",
-      "1pctCO2-bgc",
-      "esm-flat10",
-      "esm-flat10-zec",
-    ]) {
-      expect(classifyExperiment(name).id, name).toBe("idealised");
+  it("marks only projections as isProjection", () => {
+    expect(resolveExperimentClass("projection").isProjection).toBe(true);
+    for (const id of ["baseline", "historical", "idealised"] as const) {
+      expect(resolveExperimentClass(id).isProjection, id).toBe(false);
     }
   });
 
-  it("treats fixed-SST piClim diagnostics (incl. the Control member) as idealised, not baseline", () => {
-    expect(classifyExperiment("piClim-Control").id).toBe("idealised");
-    expect(classifyExperiment("piClim-4xCO2").id).toBe("idealised");
-    expect(classifyExperiment("piClim-anthro").id).toBe("idealised");
-  });
-
-  it("recognises SSP/scenario names as projections", () => {
-    expect(classifyExperiment("ssp245").id).toBe("projection");
-    expect(classifyExperiment("ssp585").id).toBe("projection");
-    expect(classifyExperiment("scenarioMIP-x").id).toBe("projection");
-  });
-
-  it("defaults unknown names to idealised so nothing is silently marked a projection", () => {
-    const cls = classifyExperiment("some-future-experiment");
+  it("falls back to idealised (not a projection) when no class is declared", () => {
+    const cls = resolveExperimentClass(undefined);
     expect(cls.id).toBe("idealised");
     expect(cls.isProjection).toBe(false);
   });
 
-  it("marks only projections as isProjection", () => {
-    expect(classifyExperiment("ssp245").isProjection).toBe(true);
-    for (const name of ["piControl", "historical", "abrupt-4xCO2", "amip"]) {
-      expect(classifyExperiment(name).isProjection, name).toBe(false);
-    }
+  it("falls back to idealised for a class id outside the known set", () => {
+    // The config is external data, so guard against a stray value.
+    const cls = resolveExperimentClass("nonsense" as never);
+    expect(cls.id).toBe("idealised");
   });
 });
 
 describe("experimentClassesPresent", () => {
   it("returns the distinct classes present, in display order, deduplicated", () => {
     const result = experimentClassesPresent([
-      "abrupt-4xCO2",
+      "idealised",
       "historical",
-      "piControl",
-      "esm-historical",
-      "1pctCO2",
+      "baseline",
+      "historical",
+      "idealised",
     ]);
     expect(result.map((c) => c.id)).toEqual([
       "historical",
@@ -70,8 +48,8 @@ describe("experimentClassesPresent", () => {
     ]);
   });
 
-  it("omits classes not present (no projection when none are scenarios)", () => {
-    const result = experimentClassesPresent(["piControl", "abrupt-4xCO2"]);
+  it("omits classes not present (no projection when none are declared)", () => {
+    const result = experimentClassesPresent(["baseline", "idealised"]);
     expect(result.map((c) => c.id)).not.toContain("projection");
   });
 });

@@ -1,5 +1,7 @@
 import { loadExperimentConfig } from "./experimentConfig";
 import type { ExperimentConfig } from "./experimentConfig";
+import { resolveExperimentClass } from "./experimentClass";
+import type { ExperimentClass } from "./experimentClass";
 
 /** Raw shape produced by the Payu experiment API / CLI output. */
 export interface PayuExperimentRaw {
@@ -25,6 +27,8 @@ export interface PayuExperiment {
   yearsRun: number;
   expectedYearsRun: number | null;
   esgfPublished: boolean | null;
+  /** Resolved scientific taxonomy class (issue #14), from the config `class`. */
+  experimentClass: ExperimentClass;
   /** All original key/value pairs for the expanded details panel. */
   details: Record<string, unknown>;
 }
@@ -71,6 +75,7 @@ export function normalizePayuExperiment(
     yearsRun: payuData ? calculateYearsRun(payuData) : 0,
     expectedYearsRun: configEntry.expected_years_run,
     esgfPublished: configEntry.esgf_published ?? null,
+    experimentClass: resolveExperimentClass(configEntry.class),
     details: payuData ? { ...payuData } : {},
   };
 }

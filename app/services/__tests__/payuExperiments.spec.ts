@@ -110,6 +110,21 @@ describe("normalizePayuExperiment", () => {
     expect(result.esgfPublished).toBe(false);
   });
 
+  it("resolves the experiment class from the config class field", () => {
+    const result = normalizePayuExperiment(
+      { ...BASE_CONFIG, class: "historical" },
+      BASE_PAYU,
+    );
+    expect(result.experimentClass.id).toBe("historical");
+  });
+
+  it("falls back to the idealised class when config declares no class", () => {
+    // BASE_CONFIG has no class field.
+    const result = normalizePayuExperiment(BASE_CONFIG, BASE_PAYU);
+    expect(result.experimentClass.id).toBe("idealised");
+    expect(result.experimentClass.isProjection).toBe(false);
+  });
+
   it("includes all payu fields in details for forward compatibility", () => {
     const payuData: PayuExperimentRaw = {
       ...BASE_PAYU,

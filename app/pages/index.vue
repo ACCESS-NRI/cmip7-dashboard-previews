@@ -150,7 +150,7 @@ onMounted(async () => {
              as projections (issue #14). Shown where non-specialists browse. -->
         <ExperimentClassLegend
           v-if="level < 2"
-          :experiment-names="payuExperiments.map((e) => e.name)"
+          :class-ids="payuExperiments.map((e) => e.experimentClass.id)"
           class="mb-12"
         />
 

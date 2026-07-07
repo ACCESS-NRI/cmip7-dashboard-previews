@@ -5,6 +5,7 @@ import { mountSuspended } from "@nuxt/test-utils/runtime";
 import type { ContentCollectionItem } from "@nuxt/content";
 import ExperimentCard from "../ExperimentCard.vue";
 import type { PayuExperiment } from "~/services/payuExperiments";
+import { EXPERIMENT_CLASSES } from "~/services/experimentClass";
 
 // Drive the shared detail level directly so each test can pin a level.
 const levelState = vi.hoisted(() => ({
@@ -34,6 +35,7 @@ function makeExperiment(
     yearsRun: 50,
     expectedYearsRun: 172,
     esgfPublished: false,
+    experimentClass: EXPERIMENT_CLASSES.historical,
     details: { experiment_name: "historical", experiment_service_units: 100 },
     ...overrides,
   };
@@ -109,7 +111,10 @@ describe("ExperimentCard", () => {
 
   it("labels the experiment class and warns that idealised runs are not projections", async () => {
     const wrapper = await mountCard({
-      experiment: makeExperiment({ name: "abrupt-4xCO2" }),
+      experiment: makeExperiment({
+        name: "abrupt-4xCO2",
+        experimentClass: EXPERIMENT_CLASSES.idealised,
+      }),
       post: null,
     });
 

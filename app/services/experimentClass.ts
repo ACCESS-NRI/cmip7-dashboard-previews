@@ -7,10 +7,13 @@
  * with plain-language framing and — critically — an explicit `isProjection`
  * flag so the UI can mark non-projection runs as such.
  *
- * Classification is derived from the experiment name so it needs no change to
- * the external experiment-config.json or the tracking-services API. The default
- * for an unrecognised name is the conservative one: treat it as NOT a
- * projection, so a new experiment can never *silently* be presented as one.
+ * The class of each experiment is declared explicitly in
+ * `public/experiment-config.json` (a `class` field) rather than inferred from
+ * the name — the experiments are a known, finite enumeration, so hard-coding is
+ * safer than name-matching. This module holds the class *definitions*; the
+ * *assignment* is data. A missing or unknown class resolves to the conservative
+ * default (`idealised`, i.e. explicitly NOT a projection), so a new experiment
+ * can never *silently* be presented as one.
  */
 
 export type ExperimentClassId =
@@ -81,32 +84,15 @@ export const EXPERIMENT_CLASSES: Record<ExperimentClassId, ExperimentClass> = {
 };
 
 /**
- * Ordered name-matching rules. The first match wins, so more specific rules
- * come first. An experiment that matches nothing falls through to `idealised`,
- * which is the safe default: it is visibly marked as *not* a projection.
+ * Resolve an experiment's declared class id (from experiment-config.json) to its
+ * full definition. A missing or unrecognised id falls back to `idealised`, the
+ * safe default: it is visibly marked as *not* a projection, so nothing is ever
+ * silently presented as a forecast.
  */
-const RULES: { test: RegExp; classId: ExperimentClassId }[] = [
-  // Policy-facing scenarios (none in the current config, but future-proofed so
-  // real projections light up the emphasised treatment automatically).
-  { test: /^(ssp|scenario|rcp)/i, classId: "projection" },
-  // Fixed-SST radiative-forcing diagnostics are idealised, even the "Control"
-  // member of the family — catch them before the piControl baseline rule.
-  { test: /^piClim/i, classId: "idealised" },
-  // Pre-industrial control: the quiet baseline.
-  { test: /piControl/i, classId: "baseline" },
-  // Reconstructions / evaluations of the observed record.
-  { test: /(historical|amip)/i, classId: "historical" },
-];
-
-/**
- * Classify a CMIP7 experiment by name. Case-insensitive; unknown names are
- * treated as idealised (i.e. explicitly not a projection).
- */
-export function classifyExperiment(name: string): ExperimentClass {
-  for (const rule of RULES) {
-    if (rule.test.test(name)) return EXPERIMENT_CLASSES[rule.classId];
-  }
-  return EXPERIMENT_CLASSES.idealised;
+export function resolveExperimentClass(
+  id: ExperimentClassId | undefined,
+): ExperimentClass {
+  return (id && EXPERIMENT_CLASSES[id]) || EXPERIMENT_CLASSES.idealised;
 }
 
 /** The classes present in a set of experiments, in display order. */
@@ -117,8 +103,11 @@ const CLASS_ORDER: ExperimentClassId[] = [
   "idealised",
 ];
 
-export function experimentClassesPresent(names: string[]): ExperimentClass[] {
-  const present = new Set(names.map((n) => classifyExperiment(n).id));
+/** The distinct classes present among the given class ids, in display order. */
+export function experimentClassesPresent(
+  ids: (ExperimentClassId | undefined)[],
+): ExperimentClass[] {
+  const present = new Set(ids.map((id) => resolveExperimentClass(id).id));
   return CLASS_ORDER.filter((id) => present.has(id)).map(
     (id) => EXPERIMENT_CLASSES[id],
   );

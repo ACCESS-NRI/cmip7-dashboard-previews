@@ -93,7 +93,7 @@
                 {{ item.experiment.name }}
               </span>
               <ExperimentClassBadge
-                :name="item.experiment.name"
+                :experiment-class="item.experiment.experimentClass"
                 size="sm"
                 class="hidden shrink-0 sm:inline-flex"
               />
