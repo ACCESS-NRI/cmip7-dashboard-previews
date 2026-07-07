@@ -199,10 +199,11 @@ onMounted(async () => {
           About
         </h2>
         <p>
-          This dashboard is a browser-based view over CMIP7 model runs and
-          derived indicators such as TCRE. Scientists can publish CMIP7 updates
-          by adding a markdown file under <code>content/blog/</code> — it
-          appears on the
+          This dashboard is a browser-based view over
+          <Jargon term="CMIP7">CMIP7</Jargon> model runs and derived indicators
+          such as <Jargon term="TCRE">TCRE</Jargon>. Scientists can publish
+          CMIP7 updates by adding a markdown file under
+          <code>content/blog/</code> — it appears on the
           <NuxtLink
             to="/blog"
             class="font-medium text-blue-700 hover:underline dark:text-blue-400"
