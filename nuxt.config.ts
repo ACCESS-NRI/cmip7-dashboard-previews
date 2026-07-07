@@ -23,7 +23,7 @@ export default defineNuxtConfig({
     // per-branch sub-path (see .github/workflows/branch-preview.yml).
     baseURL:
       process.env.NUXT_APP_BASE_URL ??
-      (process.env.NODE_ENV === "production" ? "/cmip7-dashboard/" : "/"),
+      (process.env.NODE_ENV === "production" ? "/cmip7-dashboard-previews/" : "/"),
   },
   runtimeConfig: {
     public: {
