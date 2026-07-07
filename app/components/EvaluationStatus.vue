@@ -25,10 +25,7 @@ withDefaults(
   >
     <UIcon name="i-lucide-radar" class="size-4 shrink-0" />
     <span>
-      <span class="font-medium text-gray-600 dark:text-gray-300"
-        >Evaluation (REF)</span
-      >
-      —
+      Evaluation (<Jargon term="REF">REF</Jargon>) —
       <template v-if="refStatus">{{ refStatus }}</template>
       <template v-else>Rapid Evaluation Framework — not yet available</template>
     </span>

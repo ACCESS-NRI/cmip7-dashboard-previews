@@ -16,6 +16,7 @@ const MOCK_EXPERIMENTS: PayuExperiment[] = [
     expectedYearsRun: 500,
     esgfPublished: false,
     experimentClass: EXPERIMENT_CLASSES.idealised,
+    tiers: [],
     details: {
       experiment_name: "Ndep2-PI-CNP-concentrations",
       experiment_uuid: "e523e199-80f6-4ca6-b84a-e513a16f2029",
@@ -34,6 +35,7 @@ const MOCK_EXPERIMENTS: PayuExperiment[] = [
     expectedYearsRun: 500,
     esgfPublished: true,
     experimentClass: EXPERIMENT_CLASSES.baseline,
+    tiers: [],
     details: {
       experiment_name: "piControl-spun-up",
       experiment_uuid: "f9e8d7c6-fedc-ba98-7654-321012345678",

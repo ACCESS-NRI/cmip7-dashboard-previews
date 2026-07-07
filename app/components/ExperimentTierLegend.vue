@@ -28,8 +28,9 @@ const tiers = computed(() => experimentTiersPresent(props.experimentTiers));
       How these fit into CMIP7
     </h2>
     <p class="mb-4 text-sm text-gray-500 dark:text-gray-400">
-      Experiments are organised in stacked layers: a shared foundation, with
-      priority experiments fast-tracked on top for assessment.
+      Experiments are organised in stacked layers: a shared
+      <Jargon term="DECK">foundation</Jargon>, with priority experiments
+      <Jargon term="Fast Track">fast-tracked</Jargon> on top for assessment.
     </p>
     <ul class="space-y-3">
       <li
