@@ -1,0 +1,1 @@
+import{_ as t,o as s,c as o,G as c}from"./FY1Q3b5d.js";const a={},r={class:"bg-default text-default"};function n(e,d){return s(),o("div",r,[c(e.$slots,"default")])}const _=t(a,[["render",n]]);export{_ as default};
