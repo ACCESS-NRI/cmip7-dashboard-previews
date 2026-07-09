@@ -192,9 +192,9 @@ describe("ExperimentProgrammeGroups", () => {
     });
 
     const toggle = wrapper.find('[data-test="experiment-group-toggle-deck"]');
-    expect(toggle.attributes("aria-expanded")).toBe("true");
+    expect(toggle.attributes("aria-expanded")).toBe("false");
 
     await toggle.trigger("click");
-    expect(toggle.attributes("aria-expanded")).toBe("false");
+    expect(toggle.attributes("aria-expanded")).toBe("true");
   });
 });
