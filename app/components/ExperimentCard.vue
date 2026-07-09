@@ -3,7 +3,6 @@ import { computed } from "vue";
 import type { ContentCollectionItem } from "@nuxt/content";
 import { useDetailLevel } from "~/composables/useDetailLevel";
 import type { PayuExperiment } from "~/services/payuExperiments";
-import { classifyExperiment } from "~/services/experimentClass";
 
 const props = defineProps<{
   experiment: PayuExperiment;
@@ -17,9 +16,7 @@ const furtherReading = computed(() => props.post?.furtherReading ?? []);
 
 // Experiment taxonomy (issue #14): idealised runs (e.g. abrupt-4xCO2) are the
 // ones most easily misread as projections, so flag them explicitly.
-const experimentClass = computed(() =>
-  classifyExperiment(props.experiment.name),
-);
+const experimentClass = computed(() => props.experiment.experimentClass);
 const isIdealised = computed(() => experimentClass.value.id === "idealised");
 </script>
 
@@ -37,7 +34,17 @@ const isIdealised = computed(() => experimentClass.value.id === "idealised");
       >
         {{ experiment.name }}
       </h3>
-      <ExperimentClassBadge :name="experiment.name" class="shrink-0" />
+      <!-- Two orthogonal axes: scientific class (issue #14) and CMIP7
+           participation tier(s) (issue #21). Distinct badge styles keep them
+           legible as separate things. -->
+      <div class="flex shrink-0 flex-wrap justify-end gap-1.5">
+        <ExperimentClassBadge :experiment-class="experiment.experimentClass" />
+        <ExperimentTierBadge
+          v-for="tier in experiment.tiers"
+          :key="tier.id"
+          :tier="tier"
+        />
+      </div>
     </header>
 
     <!-- Overview: the explainer's one-liner, expandable to the full article. -->
@@ -103,6 +110,9 @@ const isIdealised = computed(() => experimentClass.value.id === "idealised");
       >
         <Jargon term="ESGF">ESGF</Jargon> published
       </EsgfStatus>
+      <!-- REF is a separate dimension from run progress (issue #21): shown
+           detached, as a placeholder until the evaluation data source lands. -->
+      <EvaluationStatus />
     </div>
   </section>
 </template>

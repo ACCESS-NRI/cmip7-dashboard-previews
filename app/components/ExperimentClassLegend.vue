@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { experimentClassesPresent } from "~/services/experimentClass";
+import type { ExperimentClassId } from "~/services/experimentClass";
 
 const props = defineProps<{
-  /** Names of the experiments currently on the dashboard. */
-  experimentNames: string[];
+  /** Taxonomy class ids of the experiments currently on the dashboard. */
+  classIds: ExperimentClassId[];
 }>();
 
-const classes = computed(() => experimentClassesPresent(props.experimentNames));
+const classes = computed(() => experimentClassesPresent(props.classIds));
 </script>
 
 <!-- Explains the experiment taxonomy so the projection / non-projection

@@ -1,17 +1,14 @@
 <script setup lang="ts">
-import { computed } from "vue";
-import { classifyExperiment } from "~/services/experimentClass";
+import type { ExperimentClass } from "~/services/experimentClass";
 
-const props = withDefaults(
+withDefaults(
   defineProps<{
-    /** Experiment name to classify and label. */
-    name: string;
+    /** The resolved taxonomy class to label. */
+    experimentClass: ExperimentClass;
     size?: "sm" | "md";
   }>(),
   { size: "md" },
 );
-
-const experimentClass = computed(() => classifyExperiment(props.name));
 </script>
 
 <!-- Class badge for an experiment (issue #14): flags at a glance whether a run
