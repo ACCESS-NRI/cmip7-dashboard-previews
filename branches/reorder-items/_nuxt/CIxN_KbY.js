@@ -1,1 +1,0 @@
-import{_ as t,o as s,c as o,I as c}from"./DWV6LPIG.js";const a={},r={class:"bg-default text-default"};function n(e,d){return s(),o("div",r,[c(e.$slots,"default")])}const _=t(a,[["render",n]]);export{_ as default};
