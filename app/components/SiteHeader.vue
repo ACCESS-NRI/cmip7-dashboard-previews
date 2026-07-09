@@ -8,7 +8,9 @@ const items = computed<NavigationMenuItem[]>(() => [
   { label: "Dashboard", to: "/", exact: true },
   // startsWith so the tab stays active on nested entries (/blog/:slug),
   // which are separate route records from /blog and wouldn't match otherwise.
-  { label: "Blog", to: "/blog", active: route.path.startsWith("/blog") },
+
+   // Keep the blog hidden here: still accessible via pages though.
+   //{ label: "Blog", to: "/blog", active: route.path.startsWith("/blog") },
   {
     label: "Glossary",
     to: "/glossary",
