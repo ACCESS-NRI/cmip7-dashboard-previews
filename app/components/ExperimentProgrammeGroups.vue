@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch } from "vue";
+import { computed, ref } from "vue";
 import type { ContentCollectionItem } from "@nuxt/content";
 import type { PayuExperiment } from "~/services/payuExperiments";
 import {
@@ -17,13 +17,16 @@ const props = defineProps<{
 const groups = computed(() => groupExperimentsByProgramme(props.experiments));
 const openGroups = ref<string[]>([]);
 
-watch(
-  groups,
-  (nextGroups) => {
-    openGroups.value = nextGroups.map((group) => group.id);
-  },
-  { immediate: true },
-);
+const { getTerm } = useGlossary();
+
+/**
+ * The plain-language glossary definition shown in the collapsed footer. Sourced
+ * from the glossary's `long` field (deck / aft → fast-track), falling back to the
+ * group's own description for groups with no glossary entry (e.g. "other").
+ */
+function glossaryLongFor(group: { id: string; description: string }): string {
+  return getTerm(group.id)?.long ?? group.description;
+}
 
 function toggleGroup(id: string) {
   openGroups.value = openGroups.value.includes(id)
@@ -290,6 +293,19 @@ function statusClass(status: ExperimentRunStatus): string {
             </ul>
           </div>
         </div>
+      </div>
+
+      <div
+        v-show="!isOpen(group.id)"
+        class="flex items-start gap-2 border-t border-gray-100 px-5 py-4 text-sm text-gray-500 dark:border-gray-800 dark:text-gray-400"
+        :data-test="`experiment-group-glossary-${group.id}`"
+      >
+        <UIcon
+          name="i-lucide-book-open"
+          class="mt-0.5 size-4 shrink-0"
+          aria-hidden="true"
+        />
+        <p>{{ glossaryLongFor(group) }}</p>
       </div>
     </article>
   </section>
