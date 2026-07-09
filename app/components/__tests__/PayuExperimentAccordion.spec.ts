@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { mountSuspended } from "@nuxt/test-utils/runtime";
 import PayuExperimentAccordion from "../PayuExperimentAccordion.vue";
 import type { PayuExperiment } from "~/services/payuExperiments";
+import { EXPERIMENT_CLASSES } from "~/services/experimentClass";
 
 const MOCK_EXPERIMENTS: PayuExperiment[] = [
   {
@@ -11,9 +12,12 @@ const MOCK_EXPERIMENTS: PayuExperiment[] = [
     modelStartTime: "0101-01-01T00:00:00",
     modelCurrentTime: "0275-01-01T00:00:00",
     serviceUnitsDisplay: "1",
+    serviceUnits: 1,
     yearsRun: 174,
     expectedYearsRun: 500,
     esgfPublished: false,
+    experimentClass: EXPERIMENT_CLASSES.idealised,
+    tiers: [],
     details: {
       experiment_name: "Ndep2-PI-CNP-concentrations",
       experiment_uuid: "e523e199-80f6-4ca6-b84a-e513a16f2029",
@@ -28,9 +32,12 @@ const MOCK_EXPERIMENTS: PayuExperiment[] = [
     modelStartTime: "0001-01-01T00:00:00",
     modelCurrentTime: "0050-01-01T00:00:00",
     serviceUnitsDisplay: "0",
+    serviceUnits: 0,
     yearsRun: 49,
     expectedYearsRun: 500,
     esgfPublished: true,
+    experimentClass: EXPERIMENT_CLASSES.baseline,
+    tiers: [],
     details: {
       experiment_name: "piControl-spun-up",
       experiment_uuid: "f9e8d7c6-fedc-ba98-7654-321012345678",

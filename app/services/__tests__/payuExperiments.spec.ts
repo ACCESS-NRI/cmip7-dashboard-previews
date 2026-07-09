@@ -93,6 +93,7 @@ describe("normalizePayuExperiment", () => {
     expect(result.modelCurrentTime).toBe("0275-01-01T00:00:00");
     expect(result.yearsRun).toBe(174);
     expect(result.serviceUnitsDisplay).toBe("42");
+    expect(result.serviceUnits).toBe(42);
   });
 
   it("uses fallback values when payu data is undefined", () => {
@@ -101,6 +102,7 @@ describe("normalizePayuExperiment", () => {
     expect(result.modelCurrentTime).toBe("—");
     expect(result.yearsRun).toBe(0);
     expect(result.serviceUnitsDisplay).toBe("—");
+    expect(result.serviceUnits).toBe(null);
     expect(result.details).toEqual({});
   });
 
@@ -108,6 +110,21 @@ describe("normalizePayuExperiment", () => {
     const result = normalizePayuExperiment(BASE_CONFIG, BASE_PAYU);
     expect(result.expectedYearsRun).toBe(300);
     expect(result.esgfPublished).toBe(false);
+  });
+
+  it("resolves the experiment class from the config class field", () => {
+    const result = normalizePayuExperiment(
+      { ...BASE_CONFIG, class: "historical" },
+      BASE_PAYU,
+    );
+    expect(result.experimentClass.id).toBe("historical");
+  });
+
+  it("falls back to the idealised class when config declares no class", () => {
+    // BASE_CONFIG has no class field.
+    const result = normalizePayuExperiment(BASE_CONFIG, BASE_PAYU);
+    expect(result.experimentClass.id).toBe("idealised");
+    expect(result.experimentClass.isProjection).toBe(false);
   });
 
   it("includes all payu fields in details for forward compatibility", () => {
@@ -179,12 +196,44 @@ describe("loadPayuExperiments", () => {
     expect(result[0]!.yearsRun).toBe(0);
   });
 
-  it("throws when the payu API fails", async () => {
+  it("falls back to config-only experiments when the payu API errors", async () => {
     stubFetch({ ok: false, status: 500 });
-    await expect(loadPayuExperiments(API_URL)).rejects.toThrow("500");
+
+    const result = await loadPayuExperiments(API_URL);
+    expect(result).toHaveLength(1);
+    expect(result[0]!.name).toBe("test-run");
+    expect(result[0]!.yearsRun).toBe(0);
   });
 
-  it("throws when the API URL is not configured", async () => {
-    await expect(loadPayuExperiments("")).rejects.toThrow("payuCmip7ApiUrl");
+  it("falls back to config-only experiments when the payu API is unreachable", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(() => Promise.reject(new Error("network down"))),
+    );
+
+    const result = await loadPayuExperiments(API_URL);
+    expect(result).toHaveLength(1);
+    expect(result[0]!.serviceUnitsDisplay).toBe("—");
+  });
+
+  it("skips the telemetry fetch when the API URL is not configured", async () => {
+    const fetchSpy = vi.fn();
+    vi.stubGlobal("fetch", fetchSpy);
+
+    const result = await loadPayuExperiments("");
+    expect(fetchSpy).not.toHaveBeenCalled();
+    expect(result).toHaveLength(1);
+    expect(result[0]!.name).toBe("test-run");
+  });
+
+  it("throws when the experiment config cannot be loaded", async () => {
+    vi.spyOn(experimentConfigModule, "loadExperimentConfig").mockRejectedValue(
+      new Error("Failed to load experiment config: 404"),
+    );
+    stubFetch({ ok: true, json: async () => PAYU_DATA });
+
+    await expect(loadPayuExperiments(API_URL)).rejects.toThrow(
+      "experiment config",
+    );
   });
 });
