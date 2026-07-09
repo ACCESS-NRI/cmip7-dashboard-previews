@@ -199,7 +199,7 @@ onMounted(async () => {
       </ClientOnly>
 
       <section
-        class="mx-auto mb-12 max-w-2xl space-y-3 rounded-2xl border border-gray-200 bg-white p-5 text-sm leading-relaxed text-gray-600 shadow-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400"
+        class="mx-auto mb-12 space-y-3 rounded-2xl border border-gray-200 bg-white p-5 text-sm leading-relaxed text-gray-600 shadow-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400"
       >
         <h2
           class="text-sm font-semibold uppercase text-gray-700 dark:text-gray-200"
