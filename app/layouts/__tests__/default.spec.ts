@@ -53,14 +53,13 @@ describe("default layout navigation", () => {
     expect(dashboard.exact).toBe(true);
   });
 
-  it("keeps Blog active on the index and nested entries", async () => {
-    expect(itemByLabel(await navItemsFor("/blog"), "Blog").active).toBe(true);
-    expect(
-      itemByLabel(await navItemsFor("/blog/some-post"), "Blog").active,
-    ).toBe(true);
-  });
-
-  it("does not mark Blog active on unrelated routes", async () => {
-    expect(itemByLabel(await navItemsFor("/"), "Blog").active).toBe(false);
+  // Blog nav item is currently commented out in SiteHeader.vue. Assert the
+  // expected items are present and Blog is not, so this catches an accidental
+  // reintroduction (and flags us to restore the active-state tests) either way.
+  it("exposes Dashboard and Glossary but not Blog", async () => {
+    const labels = (await navItemsFor("/")).map((i) => i.label);
+    expect(labels).toContain("Dashboard");
+    expect(labels).toContain("Glossary");
+    expect(labels).not.toContain("Blog");
   });
 });
