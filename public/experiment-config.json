@@ -4,6 +4,7 @@
     "name": "piControl",
     "description": "-",
     "class": "baseline",
+    "deck": true,
     "expected_years_run": 1000,
     "esgf_published": false
   },
@@ -12,6 +13,7 @@
     "name": "esm-piControl",
     "description": "-",
     "class": "baseline",
+    "deck": true,
     "expected_years_run": 1000,
     "esgf_published": false
   },
@@ -20,6 +22,7 @@
     "name": "abrupt-4xCO2",
     "description": "-",
     "class": "idealised",
+    "deck": true,
     "expected_years_run": 300,
     "esgf_published": false
   },
@@ -27,6 +30,7 @@
     "name": "amip",
     "description": "-",
     "class": "historical",
+    "deck": true,
     "expected_years_run": 44,
     "esgf_published": false
   },
@@ -34,6 +38,8 @@
     "name": "historical",
     "description": "-",
     "class": "historical",
+    "deck": true,
+    "aft": true,
     "expected_years_run": 172,
     "esgf_published": false
   },
@@ -42,6 +48,7 @@
     "name": "esm-historical",
     "description": "-",
     "class": "historical",
+    "deck": true,
     "expected_years_run": 172,
     "esgf_published": false
   },
@@ -71,6 +78,7 @@
     "name": "1pctCO2",
     "description": "-",
     "class": "idealised",
+    "deck": true,
     "expected_years_run": 150,
     "esgf_published": false
   },
@@ -95,6 +103,7 @@
     "name": "esm-flat10",
     "description": "-",
     "class": "idealised",
+    "aft": true,
     "expected_years_run": 300,
     "esgf_published": false
   },
@@ -102,6 +111,7 @@
     "name": "esm-flat10-cdr",
     "description": "-",
     "class": "idealised",
+    "aft": true,
     "expected_years_run": 300,
     "esgf_published": false
   },
@@ -109,6 +119,7 @@
     "name": "esm-flat10-zec",
     "description": "-",
     "class": "idealised",
+    "aft": true,
     "expected_years_run": 300,
     "esgf_published": false
   }

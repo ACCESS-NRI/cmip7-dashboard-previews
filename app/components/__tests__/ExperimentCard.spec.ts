@@ -6,6 +6,7 @@ import type { ContentCollectionItem } from "@nuxt/content";
 import ExperimentCard from "../ExperimentCard.vue";
 import type { PayuExperiment } from "~/services/payuExperiments";
 import { EXPERIMENT_CLASSES } from "~/services/experimentClass";
+import { EXPERIMENT_TIERS } from "~/services/experimentTier";
 
 // Drive the shared detail level directly so each test can pin a level.
 const levelState = vi.hoisted(() => ({
@@ -36,6 +37,7 @@ function makeExperiment(
     expectedYearsRun: 172,
     esgfPublished: false,
     experimentClass: EXPERIMENT_CLASSES.historical,
+    tiers: [],
     details: { experiment_name: "historical", experiment_service_units: 100 },
     ...overrides,
   };

@@ -34,10 +34,17 @@ const isIdealised = computed(() => experimentClass.value.id === "idealised");
       >
         {{ experiment.name }}
       </h3>
-      <ExperimentClassBadge
-        :experiment-class="experiment.experimentClass"
-        class="shrink-0"
-      />
+      <!-- Two orthogonal axes: scientific class (issue #14) and CMIP7
+           participation tier(s) (issue #21). Distinct badge styles keep them
+           legible as separate things. -->
+      <div class="flex shrink-0 flex-wrap justify-end gap-1.5">
+        <ExperimentClassBadge :experiment-class="experiment.experimentClass" />
+        <ExperimentTierBadge
+          v-for="tier in experiment.tiers"
+          :key="tier.id"
+          :tier="tier"
+        />
+      </div>
     </header>
 
     <!-- Overview: the explainer's one-liner, expandable to the full article. -->
@@ -101,8 +108,11 @@ const isIdealised = computed(() => experimentClass.value.id === "idealised");
         :published="experiment.esgfPublished"
         class="text-xs text-gray-500 dark:text-gray-400"
       >
-        ESGF published
+        <Jargon term="ESGF">ESGF</Jargon> published
       </EsgfStatus>
+      <!-- REF is a separate dimension from run progress (issue #21): shown
+           detached, as a placeholder until the evaluation data source lands. -->
+      <EvaluationStatus />
     </div>
   </section>
 </template>

@@ -12,6 +12,15 @@ export interface ExperimentConfig {
    * load; a missing value resolves to the conservative `idealised` default.
    */
   class?: ExperimentClassId;
+  /**
+   * Participation-tier membership (issue #21), declared explicitly per
+   * experiment. `deck` marks a foundational baseline experiment; `aft` marks an
+   * Assessment Fast Track priority. Both are optional and independent — an
+   * experiment can be DECK, AFT, both, or neither. Seeded best-effort and
+   * flagged for domain review.
+   */
+  deck?: boolean;
+  aft?: boolean;
 }
 
 export async function loadExperimentConfig(): Promise<ExperimentConfig[]> {

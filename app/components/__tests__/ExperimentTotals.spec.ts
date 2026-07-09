@@ -18,6 +18,7 @@ function makeExperiment(
     expectedYearsRun: 100,
     esgfPublished: false,
     experimentClass: EXPERIMENT_CLASSES.historical,
+    tiers: [],
     details: {},
     ...overrides,
   };

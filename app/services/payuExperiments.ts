@@ -2,6 +2,8 @@ import { loadExperimentConfig } from "./experimentConfig";
 import type { ExperimentConfig } from "./experimentConfig";
 import { resolveExperimentClass } from "./experimentClass";
 import type { ExperimentClass } from "./experimentClass";
+import { experimentTiers } from "./experimentTier";
+import type { ExperimentTier } from "./experimentTier";
 
 /** Raw shape produced by the Payu experiment API / CLI output. */
 export interface PayuExperimentRaw {
@@ -29,6 +31,11 @@ export interface PayuExperiment {
   esgfPublished: boolean | null;
   /** Resolved scientific taxonomy class (issue #14), from the config `class`. */
   experimentClass: ExperimentClass;
+  /**
+   * Resolved participation tiers (issue #21), from the config `deck`/`aft`
+   * flags, in stacking order. Empty when the experiment is in no headline tier.
+   */
+  tiers: ExperimentTier[];
   /** All original key/value pairs for the expanded details panel. */
   details: Record<string, unknown>;
 }
@@ -76,6 +83,7 @@ export function normalizePayuExperiment(
     expectedYearsRun: configEntry.expected_years_run,
     esgfPublished: configEntry.esgf_published ?? null,
     experimentClass: resolveExperimentClass(configEntry.class),
+    tiers: experimentTiers({ deck: configEntry.deck, aft: configEntry.aft }),
     details: payuData ? { ...payuData } : {},
   };
 }
