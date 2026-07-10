@@ -61,8 +61,6 @@ jobs:
 
       - name: Generate static site
         run: NODE_ENV=production npm run generate
-        env:
-          APP_VERSION: ${{ steps.version.outputs.version }}
 
       - name: Deploy to gh-pages (root)
         if: github.ref == 'refs/heads/main'
