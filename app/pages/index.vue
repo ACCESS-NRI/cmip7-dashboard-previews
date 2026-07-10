@@ -14,8 +14,6 @@ useSeoMeta({
     "A lightweight interface for tracking CMIP7 climate model outputs and derived metrics.",
 });
 
-definePageMeta({ layout: "dashboard" });
-
 // Metadata for the two collapsible detail sections (single-sourced from SECTIONS).
 const progressMeta = SECTIONS.find((s) => s.id === "progress")!;
 const hoodMeta = SECTIONS.find((s) => s.id === "under-the-hood")!;
@@ -78,15 +76,15 @@ watch(payuExperiments, () => refresh());
 </script>
 
 <template>
-  <UDashboardSidebar collapsible resizable>
+  <AppSidebar>
     <SectionNav :active-id="activeId" @navigate="scrollToSection" />
-  </UDashboardSidebar>
+  </AppSidebar>
 
   <UDashboardPanel>
     <template #header>
       <!-- Desktop shows the sidebar itself, so the navbar only exists on
            mobile to host the sidebar (section nav) toggle. -->
-      <UDashboardNavbar class="lg:hidden" />
+      <UDashboardNavbar title="CMIP7 Dashboard" class="lg:hidden" />
     </template>
 
     <template #body>
