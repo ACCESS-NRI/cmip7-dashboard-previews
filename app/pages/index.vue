@@ -90,7 +90,7 @@ watch(payuExperiments, () => refresh());
     <template #body>
       <!-- Top row: the hero alongside the campaign stats — one rolled-up
            planned-vs-done figure for the whole campaign. -->
-      <div class="mb-12 grid items-stretch gap-6 lg:grid-cols-2">
+      <div class="grid items-stretch gap-6 lg:grid-cols-2">
         <section
           id="hero"
           class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-900"
@@ -168,7 +168,7 @@ watch(payuExperiments, () => refresh());
       <template v-if="!payuLoading && !payuError && payuExperiments.length > 0">
         <!-- Big picture: the always-visible primary view — programme layers
              carry the high-level overview. -->
-        <section id="big-picture" class="mb-12 scroll-mt-6">
+        <section id="big-picture" class="mb-4 scroll-mt-6">
           <ExperimentProgrammeGroups
             :experiments="payuExperiments"
             :post-by-experiment="postByExperiment"
@@ -177,7 +177,7 @@ watch(payuExperiments, () => refresh());
 
         <!-- Everything below is a deeper look, opened on demand. -->
         <div
-          class="mb-6 flex items-center gap-3"
+          class="mb-2 flex items-center gap-3"
           data-test="deeper-views-divider"
         >
           <UIcon
@@ -193,7 +193,7 @@ watch(payuExperiments, () => refresh());
           <span class="h-px flex-1 bg-gray-200 dark:bg-gray-700"></span>
         </div>
 
-        <div class="mb-12 space-y-6">
+        <div class="mb-4 space-y-6">
           <!-- Progress: one status card per experiment (progress + publication). -->
           <DetailSection
             id="progress"
@@ -246,7 +246,7 @@ watch(payuExperiments, () => refresh());
              taxonomy (issue #14) and the CMIP7 participation layers (issue #21).
              Per Kelsey's feedback these sit at the end of the page rather than
              leading it. They explain the encodings used across the page. -->
-        <div class="mb-12 grid gap-6 lg:grid-cols-2">
+        <div class="mb-4 grid gap-6 lg:grid-cols-2">
           <ExperimentClassLegend
             :class-ids="payuExperiments.map((e) => e.experimentClass.id)"
           />
@@ -257,7 +257,7 @@ watch(payuExperiments, () => refresh());
       </template>
 
       <section
-        class="mx-auto mb-12 space-y-3 rounded-2xl border border-gray-200 bg-white p-5 text-sm leading-relaxed text-gray-600 shadow-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400"
+        class="mx-auto mb-4 space-y-3 rounded-2xl border border-gray-200 bg-white p-5 text-sm leading-relaxed text-gray-600 shadow-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400"
       >
         <h2
           class="text-sm font-semibold uppercase text-gray-700 dark:text-gray-200"

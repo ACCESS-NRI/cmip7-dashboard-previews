@@ -72,14 +72,6 @@ function statusClass(status: ExperimentRunStatus): string {
     aria-label="Simulation groups"
     data-test="experiment-programme-groups"
   >
-    <div>
-      <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">
-        Simulation groups
-      </h2>
-      <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-        High-level status by CMIP7 programme layer.
-      </p>
-    </div>
 
     <article
       v-for="group in groups"
