@@ -1,23 +1,10 @@
 // @vitest-environment nuxt
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import { ref } from "vue";
+import { describe, expect, it } from "vitest";
 import { mountSuspended } from "@nuxt/test-utils/runtime";
 import type { ContentCollectionItem } from "@nuxt/content";
 import ExperimentCard from "../ExperimentCard.vue";
 import type { PayuExperiment } from "~/services/payuExperiments";
 import { EXPERIMENT_CLASSES } from "~/services/experimentClass";
-import { EXPERIMENT_TIERS } from "~/services/experimentTier";
-
-// Drive the shared detail level directly so each test can pin a level.
-const levelState = vi.hoisted(() => ({
-  ref: null as null | { value: number },
-}));
-
-vi.mock("~/composables/useDetailLevel", async (importOriginal) => {
-  const actual =
-    await importOriginal<typeof import("~/composables/useDetailLevel")>();
-  return { ...actual, useDetailLevel: () => levelState.ref };
-});
 
 const ContentRendererStub = {
   props: ["value"],
@@ -33,6 +20,7 @@ function makeExperiment(
     modelStartTime: "1850-01-01",
     modelCurrentTime: "1900-01-01",
     serviceUnitsDisplay: "100",
+    serviceUnits: 100,
     yearsRun: 50,
     expectedYearsRun: 172,
     esgfPublished: false,
@@ -58,6 +46,7 @@ function makePost(): ContentCollectionItem {
 function mountCard(props: {
   experiment: PayuExperiment;
   post?: ContentCollectionItem | null;
+  variant?: "overview" | "status";
 }) {
   return mountSuspended(ExperimentCard, {
     props,
@@ -66,14 +55,11 @@ function mountCard(props: {
 }
 
 describe("ExperimentCard", () => {
-  beforeEach(() => {
-    levelState.ref = ref(0);
-  });
-
-  it("shows the explainer description at Overview level", async () => {
+  it("shows the explainer description in the overview variant", async () => {
     const wrapper = await mountCard({
       experiment: makeExperiment(),
       post: makePost(),
+      variant: "overview",
     });
 
     expect(wrapper.find('[data-test="card-overview"]').text()).toContain(
@@ -88,6 +74,7 @@ describe("ExperimentCard", () => {
     const wrapper = await mountCard({
       experiment: makeExperiment(),
       post: makePost(),
+      variant: "overview",
     });
 
     await wrapper.find('[data-test="overview-toggle"]').trigger("click");
@@ -100,10 +87,11 @@ describe("ExperimentCard", () => {
     expect(link.attributes("target")).toBe("_blank");
   });
 
-  it("shows a placeholder at Overview when no post is tagged", async () => {
+  it("shows a placeholder in the overview variant when no post is tagged", async () => {
     const wrapper = await mountCard({
       experiment: makeExperiment(),
       post: null,
+      variant: "overview",
     });
 
     expect(wrapper.find('[data-test="overview-placeholder"]').exists()).toBe(
@@ -118,6 +106,7 @@ describe("ExperimentCard", () => {
         experimentClass: EXPERIMENT_CLASSES.idealised,
       }),
       post: null,
+      variant: "overview",
     });
 
     const badge = wrapper.find('[data-test="experiment-class-badge"]');
@@ -131,6 +120,7 @@ describe("ExperimentCard", () => {
     const wrapper = await mountCard({
       experiment: makeExperiment({ name: "historical" }),
       post: makePost(),
+      variant: "overview",
     });
 
     expect(
@@ -143,16 +133,26 @@ describe("ExperimentCard", () => {
     );
   });
 
-  it("shows progress and ESGF at Status level, without the overview", async () => {
-    levelState.ref = ref(1);
+  it("shows progress and ESGF in the status variant, without the overview", async () => {
+    const wrapper = await mountCard({
+      experiment: makeExperiment(),
+      post: makePost(),
+      variant: "status",
+    });
+
+    expect(wrapper.find('[data-test="card-status"]').exists()).toBe(true);
+    expect(wrapper.find('[data-test="progress-bar"]').exists()).toBe(true);
+    expect(wrapper.find('[data-test="esgf-status"]').exists()).toBe(true);
+    expect(wrapper.find('[data-test="card-overview"]').exists()).toBe(false);
+  });
+
+  it("defaults to the status variant when none is given", async () => {
     const wrapper = await mountCard({
       experiment: makeExperiment(),
       post: makePost(),
     });
 
     expect(wrapper.find('[data-test="card-status"]').exists()).toBe(true);
-    expect(wrapper.find('[data-test="progress-bar"]').exists()).toBe(true);
-    expect(wrapper.find('[data-test="esgf-status"]').exists()).toBe(true);
     expect(wrapper.find('[data-test="card-overview"]').exists()).toBe(false);
   });
 });
