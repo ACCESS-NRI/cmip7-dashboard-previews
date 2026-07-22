@@ -19,9 +19,7 @@ defineProps<{
     <div class="grid gap-6 md:grid-cols-[15rem_minmax(0,1fr)]">
       <!-- Brand rail: the title + logo row stacks on top of the tagline at
            every breakpoint. -->
-      <div
-        class="flex flex-col items-start gap-4"
-      >
+      <div class="flex flex-col items-start gap-4">
         <div class="flex-2 md:flex-none">
           <div class="flex items-center gap-3">
             <h1
@@ -36,13 +34,18 @@ defineProps<{
               aria-label="ACCESS-NRI"
               class="flex items-center"
             >
-              <img :src="accessLogo" alt="ACCESS-NRI" class="h-24 object-contain" />
+              <img
+                :src="accessLogo"
+                alt="ACCESS-NRI"
+                class="h-24 object-contain"
+              />
             </a>
           </div>
         </div>
         <div class="flex-1 md:flex-none">
           <p class="text-sm leading-relaxed text-gray-500 dark:text-gray-400">
-            Tracking Australia's contribution to CMIP7: the next generation climate model intercomparison project.
+            Tracking Australia's contribution to CMIP7: the next generation
+            climate model intercomparison project.
           </p>
         </div>
       </div>
