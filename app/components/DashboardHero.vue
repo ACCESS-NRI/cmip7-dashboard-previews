@@ -17,29 +17,32 @@ defineProps<{
     class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-900"
   >
     <div class="grid gap-6 md:grid-cols-[15rem_minmax(0,1fr)]">
-      <!-- Brand rail: on mobile the logo sits to the right of the tagline,
-           and the title is hidden (the mobile navbar already shows it) — so
-           it only appears from lg up. From md up the logo stacks on top. -->
+      <!-- Brand rail: the title + logo row stacks on top of the tagline at
+           every breakpoint. -->
       <div
-        class="flex flex-row-reverse items-center gap-4 md:flex-col md:items-start"
+        class="flex flex-col items-start gap-4"
       >
-        <a
-          href="https://www.access-nri.org.au"
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="ACCESS-NRI"
-          class="inline-block shrink-0"
-        >
-          <img :src="accessLogo" alt="ACCESS-NRI" class="h-10 object-contain" />
-        </a>
+        <div class="flex-2 md:flex-none">
+          <div class="flex items-center gap-3">
+            <h1
+              class="text-2xl font-semibold text-gray-800 sm:text-3xl dark:text-gray-100"
+            >
+              CMIP7 Dashboard
+            </h1>
+            <a
+              href="https://www.access-nri.org.au"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="ACCESS-NRI"
+              class="flex items-center"
+            >
+              <img :src="accessLogo" alt="ACCESS-NRI" class="h-24 object-contain" />
+            </a>
+          </div>
+        </div>
         <div class="flex-1 md:flex-none">
-          <h1
-            class="mb-2 hidden text-2xl font-semibold text-gray-800 sm:text-3xl lg:block dark:text-gray-100"
-          >
-            CMIP7 Dashboard
-          </h1>
           <p class="text-sm leading-relaxed text-gray-500 dark:text-gray-400">
-            Tracking CMIP7 model outputs and derived metrics as runs progress.
+            Tracking Australia's contribution to CMIP7: the next generation climate model intercomparison project.
           </p>
         </div>
       </div>
