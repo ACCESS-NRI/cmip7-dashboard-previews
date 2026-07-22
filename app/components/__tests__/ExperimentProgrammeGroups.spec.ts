@@ -288,6 +288,27 @@ describe("ExperimentProgrammeGroups", () => {
       ).toBe("1 experiments");
     });
 
+    it("keeps the percentage badge on the title line, open or closed", async () => {
+      const wrapper = await mountThreeGroups();
+
+      // The badge shares a row with the label rather than sitting below it, so
+      // it lands in the same place whichever mode the card is in.
+      const titleRow = () =>
+        wrapper.find('[data-test="experiment-group-percent-deck"]').element
+          .parentElement;
+
+      expect(titleRow()?.textContent).toContain("DECK");
+      expect(titleRow()?.textContent).toContain("50% complete");
+      expect(titleRow()?.textContent).not.toContain(
+        "A foundational experiment",
+      );
+
+      await open(wrapper, "deck");
+
+      expect(titleRow()?.textContent).toContain("DECK");
+      expect(titleRow()?.textContent).toContain("50% complete");
+    });
+
     it("stacks every group full width when all are open", async () => {
       const wrapper = await mountThreeGroups();
       await open(wrapper, "deck");

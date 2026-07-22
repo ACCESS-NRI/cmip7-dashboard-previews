@@ -147,7 +147,7 @@ function formatNumber(value: number): string {
     >
       <button
         type="button"
-        class="flex w-full flex-wrap items-center gap-x-4 gap-y-3 px-5 text-left transition hover:bg-gray-50 dark:hover:bg-gray-800"
+        class="flex w-full items-start gap-4 px-5 text-left transition hover:bg-gray-50 dark:hover:bg-gray-800"
         :class="mode === 'strip' ? 'py-3' : 'py-4'"
         :aria-expanded="isOpen(group.id)"
         :aria-controls="`experiment-group-panel-${group.id}`"
@@ -156,7 +156,7 @@ function formatNumber(value: number): string {
       >
         <UIcon
           :name="group.icon"
-          class="size-5 shrink-0"
+          class="mt-0.5 size-5 shrink-0"
           :class="{
             'text-blue-600 dark:text-blue-400': group.id === 'deck',
             'text-green-600 dark:text-green-400': group.id === 'aft',
@@ -164,10 +164,27 @@ function formatNumber(value: number): string {
           }"
         />
         <span class="min-w-0 flex-1">
-          <span
-            class="block text-base font-semibold text-gray-800 dark:text-gray-100"
-          >
-            {{ group.label }}
+          <!-- The badge rides the title line, right-aligned, in every mode: the
+               label span is flex-1, so its right edge is the header's right edge
+               and the badge lands in the same place open or closed. That also
+               leaves the description the full width of a narrow tile. -->
+          <span class="flex items-center justify-between gap-3">
+            <span
+              class="text-base font-semibold text-gray-800 dark:text-gray-100"
+            >
+              {{ group.label }}
+            </span>
+            <UBadge
+              :color="group.color"
+              variant="subtle"
+              :label="
+                group.summary.percent === null
+                  ? `${group.summary.total} experiments`
+                  : `${group.summary.percent}% complete`
+              "
+              class="shrink-0"
+              :data-test="`experiment-group-percent-${group.id}`"
+            />
           </span>
           <!-- Strips have one line to play with, so the description is dropped
                there (and on mobile, where every closed card is a strip). -->
@@ -181,23 +198,6 @@ function formatNumber(value: number): string {
             {{ group.description }}
           </span>
         </span>
-        <!-- Tiles are too narrow to keep the badge on the title line, so it
-             drops to a line of its own below. -->
-        <span
-          class="shrink-0"
-          :class="{ 'lg:order-last lg:w-full': mode === 'tile' }"
-        >
-          <UBadge
-            :color="group.color"
-            variant="subtle"
-            :label="
-              group.summary.percent === null
-                ? `${group.summary.total} experiments`
-                : `${group.summary.percent}% complete`
-            "
-            :data-test="`experiment-group-percent-${group.id}`"
-          />
-        </span>
         <!-- The badge carries the percentage; a strip has room for the count too. -->
         <span
           v-if="mode !== 'open' && group.summary.percent !== null"
@@ -209,7 +209,7 @@ function formatNumber(value: number): string {
         </span>
         <UIcon
           name="i-lucide-chevron-down"
-          class="size-5 shrink-0 text-gray-400 transition-transform"
+          class="mt-0.5 size-5 shrink-0 text-gray-400 transition-transform"
           :class="{ 'rotate-180': isOpen(group.id) }"
           aria-hidden="true"
         />
