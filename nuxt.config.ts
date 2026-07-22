@@ -9,55 +9,49 @@ const getGitCommitSha = () => {
   }
 };
 
-const getGitHubRepositoryUrl = () => {
-  const configuredUrl = process.env.NUXT_PUBLIC_GITHUB_REPOSITORY_URL;
-  if (configuredUrl) return configuredUrl.replace(/\/$/, "");
-
-  for (const remoteName of ["access-nri", "origin"]) {
-    try {
-      const remoteUrl = execSync(`git remote get-url ${remoteName}`)
-        .toString()
-        .trim();
-
-      if (remoteUrl.startsWith("git@github.com:")) {
-        return `https://github.com/${remoteUrl
-          .replace("git@github.com:", "")
-          .replace(/\.git$/, "")}`;
-      }
-
-      if (remoteUrl.startsWith("https://github.com/")) {
-        return remoteUrl.replace(/\.git$/, "").replace(/\/$/, "");
-      }
-    } catch {
-      // Try the next remote.
-    }
+// Get the build's release tag: workflow-provided version > exact tag on HEAD > "".
+// An empty string means "no tag" and lets the UI fall back to the short SHA.
+const getAppVersion = () => {
+  if (process.env.APP_VERSION) {
+    return process.env.APP_VERSION;
   }
 
-  return "https://github.com/ACCESS-NRI/cmip7-dashboard-previews";
+  try {
+    return execSync("git describe --tags --exact-match HEAD").toString().trim();
+  } catch {
+    return "";
+  }
 };
+
+// Base path for the deploy: GitHub Pages serves under /cmip7-dashboard/.
+// Nuxt does not rewrite head-link hrefs with app.baseURL, so the favicon href
+// is prefixed manually below to avoid a 404 on the subpath deploy.
+const baseURL =
+  process.env.NODE_ENV === "production" ? "/cmip7-dashboard/" : "/";
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   compatibilityDate: "2025-07-15",
   devtools: { enabled: true },
-  // TEMP (branch previews): branch builds are SPA-only + hash-routed (see
-  // app/router.options.ts), so skip SSR/prerender for them. Main/local unaffected.
-  ssr: !process.env.NUXT_APP_BASE_URL?.includes("/branches/"),
   modules: ["@nuxt/ui", "@nuxt/content", "@posthog/nuxt"],
   css: ["~/assets/css/main.css"],
   app: {
-    // NUXT_APP_BASE_URL wins so branch-preview builds can serve from a
-    // per-branch sub-path (see .github/workflows/branch-preview.yml).
-    baseURL:
-      process.env.NUXT_APP_BASE_URL ??
-      (process.env.NODE_ENV === "production"
-        ? "/cmip7-dashboard-previews/"
-        : "/"),
+    baseURL,
+    head: {
+      link: [
+        {
+          rel: "icon",
+          type: "image/svg+xml",
+          href: `${baseURL}ACCESS-logo.svg`,
+        },
+      ],
+    },
   },
   runtimeConfig: {
     public: {
       gitCommitSha: getGitCommitSha(),
-      githubRepositoryUrl: getGitHubRepositoryUrl(),
+      appVersion: getAppVersion(),
+      githubRepositoryUrl: "https://github.com/ACCESS-NRI/cmip7-dashboard",
       buildTime: new Date().toISOString(),
       // CMIP7 parquet data source (previously the VITE_CMIP7_* env vars).
       cmip7ParquetSource:
@@ -65,9 +59,7 @@ export default defineNuxtConfig({
       cmip7ParquetFileName:
         process.env.NUXT_PUBLIC_CMIP7_PARQUET_FILE_NAME ?? "gm_tas.pq",
       // Payu telemetry endpoint (tracking-services API).
-      payuCmip7ApiUrl:
-        process.env.NUXT_PUBLIC_PAYU_CMIP7_API_URL ??
-        "https://reporting.access-nri-store.cloud.edu.au/api/payu/cmip7_summary/",
+      payuCmip7ApiUrl: process.env.NUXT_PUBLIC_PAYU_CMIP7_API_URL ?? "",
     },
   },
   posthogConfig: {
