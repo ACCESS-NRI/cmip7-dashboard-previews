@@ -18,17 +18,26 @@
 /*
  * By default the snapshots are stretched to fill the animating box, which smears
  * a 52px strip into a 500px panel. Reveal and crop instead.
+ *
+ * The duration and easing match the group below, so the box geometry and the
+ * content cross-fade resolve on one clock — otherwise the fade runs on the UA
+ * default (~250ms, linear) and drifts out of step with the grow.
  */
 ::view-transition-old(*),
 ::view-transition-new(*) {
   object-fit: none;
   object-position: top left;
+  animation-duration: 320ms;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* One unified morph: calm, decelerating, over as soon as the eye arrives. */
+/*
+ * One unified morph: a soft ease-in-out, gentle at both ends. A hard-launched
+ * decelerate here read as an abrupt lurch out of the gate.
+ */
 ::view-transition-group(*) {
-  animation-duration: 260ms;
-  animation-timing-function: cubic-bezier(0.2, 0, 0, 1);
+  animation-duration: 320ms;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /*
@@ -55,15 +64,15 @@
 ::view-transition-new(experiment-group-panel-deck),
 ::view-transition-new(experiment-group-panel-aft),
 ::view-transition-new(experiment-group-panel-other) {
-  animation-delay: 120ms;
-  animation-duration: 140ms;
+  animation-delay: 150ms;
+  animation-duration: 150ms;
   animation-fill-mode: backwards;
 }
 
 ::view-transition-old(experiment-group-panel-deck),
 ::view-transition-old(experiment-group-panel-aft),
 ::view-transition-old(experiment-group-panel-other) {
-  animation-duration: 100ms;
+  animation-duration: 120ms;
 }
 
 @media (prefers-reduced-motion: reduce) {
