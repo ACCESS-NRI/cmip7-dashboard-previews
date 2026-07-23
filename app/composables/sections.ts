@@ -25,7 +25,7 @@ export const SECTIONS: readonly SectionMeta[] = [
   {
     id: "progress",
     name: "Progress",
-    description: "How far each experiment has run, at a glance",
+    description: "How far each simulation has run, at a glance",
     icon: "i-lucide-gauge",
   },
 ] as const;
