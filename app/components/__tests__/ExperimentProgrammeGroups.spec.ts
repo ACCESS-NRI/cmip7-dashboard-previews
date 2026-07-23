@@ -285,7 +285,7 @@ describe("ExperimentProgrammeGroups", () => {
       ]);
       expect(
         wrapper.find('[data-test="experiment-group-count-deck"]').text(),
-      ).toBe("1 experiments");
+      ).toBe("1 simulations");
     });
 
     it("keeps the percentage badge on the title line, open or closed", async () => {

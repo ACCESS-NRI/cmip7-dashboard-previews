@@ -60,7 +60,7 @@ defineProps<{
           data-test="experiments-loading"
           class="flex h-full items-center justify-center py-6 text-sm text-gray-400 dark:text-gray-500"
         >
-          Loading experiments…
+          Loading simulations…
         </div>
 
         <div
@@ -76,7 +76,7 @@ defineProps<{
           data-test="experiments-empty"
           class="flex h-full items-center justify-center py-6 text-sm text-gray-400 dark:text-gray-500"
         >
-          No experiments found.
+          No simulations found.
         </div>
 
         <ExperimentTotals v-else :experiments="experiments" />
