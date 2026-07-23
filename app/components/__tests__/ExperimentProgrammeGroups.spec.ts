@@ -64,7 +64,7 @@ describe("ExperimentProgrammeGroups", () => {
 
     expect(groupLabels[0]).toContain("DECK");
     expect(groupLabels[1]).toContain("Assessment Fast Track");
-    expect(groupLabels[2]).toContain("Other experiments");
+    expect(groupLabels[2]).toContain("Other simulations");
   });
 
   it("shows overlapping experiments in both relevant groups", async () => {
