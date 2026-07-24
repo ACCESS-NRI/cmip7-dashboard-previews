@@ -15,6 +15,9 @@ const MOCK_EXPERIMENTS: PayuExperiment[] = [
     serviceUnits: 1,
     yearsRun: 174,
     expectedYearsRun: 500,
+    memberExpectedYearsRun: 500,
+    expectedEnsembleCount: 1,
+    members: [],
     esgfPublished: false,
     experimentClass: EXPERIMENT_CLASSES.idealised,
     tiers: [],
@@ -35,6 +38,9 @@ const MOCK_EXPERIMENTS: PayuExperiment[] = [
     serviceUnits: 0,
     yearsRun: 49,
     expectedYearsRun: 500,
+    memberExpectedYearsRun: 500,
+    expectedEnsembleCount: 1,
+    members: [],
     esgfPublished: true,
     experimentClass: EXPERIMENT_CLASSES.baseline,
     tiers: [],
@@ -129,6 +135,58 @@ describe("PayuExperimentAccordion", () => {
     expect(content.text()).toContain("experiment name");
     expect(content.text()).toContain("Ndep2-PI-CNP-concentrations");
     expect(content.text()).toContain("experiment service units used");
+  });
+
+  it("lists the members in the panel for an ensemble experiment", async () => {
+    // An ensemble has no single run's details to tabulate — the members it is
+    // summed from are shown instead.
+    const wrapper = await mountSuspended(PayuExperimentAccordion, {
+      props: {
+        experiments: [
+          {
+            ...MOCK_EXPERIMENTS[0]!,
+            name: "historical",
+            yearsRun: 130,
+            expectedYearsRun: 344,
+            memberExpectedYearsRun: 172,
+            expectedEnsembleCount: 2,
+            details: {},
+            members: [
+              {
+                name: "r1i1p1f1",
+                uuid: "uuid-1",
+                modelStartTime: "1850-01-01T00:00:00",
+                modelCurrentTime: "1936-01-01T00:00:00",
+                serviceUnitsDisplay: "10",
+                serviceUnits: 10,
+                yearsRun: 86,
+                expectedYearsRun: 172,
+                hasTelemetry: true,
+                details: {},
+              },
+              {
+                name: "r2i1p1f1",
+                uuid: "uuid-2",
+                modelStartTime: "1850-01-01T00:00:00",
+                modelCurrentTime: "1894-01-01T00:00:00",
+                serviceUnitsDisplay: "5",
+                serviceUnits: 5,
+                yearsRun: 44,
+                expectedYearsRun: 172,
+                hasTelemetry: true,
+                details: {},
+              },
+            ],
+          },
+        ],
+      },
+    });
+
+    expect(wrapper.findAll('[data-test="accordion-member"]')).toHaveLength(2);
+    const content = wrapper.find('[data-test="accordion-content"]');
+    expect(content.text()).toContain("r1i1p1f1");
+    expect(content.text()).toContain("86 / 172 years");
+    expect(content.text()).not.toContain("No model runs found");
   });
 
   it("shows the loading state while data is being fetched", async () => {
