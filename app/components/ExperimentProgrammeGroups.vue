@@ -70,7 +70,7 @@ const { getTerm } = useGlossary();
 
 /**
  * The plain-language glossary definition shown in the collapsed footer. Sourced
- * from the glossary's `long` field (deck → deck, scenario → ssp via its alias),
+ * from the glossary's `long` field, looked up by group id (deck, scenario), and
  * falling back to the group's own description for groups with no glossary entry
  * (e.g. "other").
  */
