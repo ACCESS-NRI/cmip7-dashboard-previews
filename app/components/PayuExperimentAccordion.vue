@@ -108,7 +108,8 @@
 
             <!-- ESGF column -->
             <EsgfStatus
-              :published="item.experiment.esgfPublished"
+              :published-count="item.experiment.esgfPublishedCount"
+              :total="item.experiment.expectedEnsembleCount"
               class="justify-center"
             />
           </div>

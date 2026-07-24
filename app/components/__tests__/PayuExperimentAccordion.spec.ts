@@ -19,6 +19,7 @@ const MOCK_EXPERIMENTS: PayuExperiment[] = [
     expectedEnsembleCount: 1,
     members: [],
     esgfPublished: false,
+    esgfPublishedCount: 0,
     experimentClass: EXPERIMENT_CLASSES.idealised,
     tiers: [],
     details: {
@@ -42,6 +43,7 @@ const MOCK_EXPERIMENTS: PayuExperiment[] = [
     expectedEnsembleCount: 1,
     members: [],
     esgfPublished: true,
+    esgfPublishedCount: 1,
     experimentClass: EXPERIMENT_CLASSES.baseline,
     tiers: [],
     details: {
@@ -85,7 +87,7 @@ describe("PayuExperimentAccordion", () => {
     expect(wrapper.find('[data-test="progress-bar"]').exists()).toBe(false);
   });
 
-  it("renders the ESGF checkbox in the header", async () => {
+  it("renders the ESGF count in the header", async () => {
     const wrapper = await mountSuspended(PayuExperimentAccordion, {
       props: { experiments: [MOCK_EXPERIMENTS[0]!] },
     });
@@ -93,37 +95,53 @@ describe("PayuExperimentAccordion", () => {
     expect(wrapper.find('[data-test="esgf-status"]').exists()).toBe(true);
   });
 
-  it("shows a checked ESGF checkbox when esgfPublished is true", async () => {
+  it("counts every member as published when the experiment is", async () => {
     const wrapper = await mountSuspended(PayuExperimentAccordion, {
       props: {
-        experiments: [{ ...MOCK_EXPERIMENTS[0]!, esgfPublished: true }],
+        experiments: [
+          {
+            ...MOCK_EXPERIMENTS[0]!,
+            expectedEnsembleCount: 10,
+            esgfPublished: true,
+            esgfPublishedCount: 10,
+          },
+        ],
       },
     });
 
-    const checkbox = wrapper.find('[data-test="esgf-status"] input');
-    expect((checkbox.element as HTMLInputElement).checked).toBe(true);
+    expect(wrapper.find('[data-test="esgf-count"]').text()).toBe("10/10");
   });
 
-  it("shows an unchecked ESGF checkbox when esgfPublished is false", async () => {
+  it("shows none published when esgfPublished is false", async () => {
     const wrapper = await mountSuspended(PayuExperimentAccordion, {
       props: {
-        experiments: [{ ...MOCK_EXPERIMENTS[0]!, esgfPublished: false }],
+        experiments: [
+          {
+            ...MOCK_EXPERIMENTS[0]!,
+            esgfPublished: false,
+            esgfPublishedCount: 0,
+          },
+        ],
       },
     });
 
-    const checkbox = wrapper.find('[data-test="esgf-status"] input');
-    expect((checkbox.element as HTMLInputElement).checked).toBe(false);
+    expect(wrapper.find('[data-test="esgf-count"]').text()).toBe("0/1");
   });
 
-  it("shows an unchecked ESGF checkbox when esgfPublished is null", async () => {
+  it("shows none published when esgfPublished is null", async () => {
     const wrapper = await mountSuspended(PayuExperimentAccordion, {
       props: {
-        experiments: [{ ...MOCK_EXPERIMENTS[0]!, esgfPublished: null }],
+        experiments: [
+          {
+            ...MOCK_EXPERIMENTS[0]!,
+            esgfPublished: null,
+            esgfPublishedCount: 0,
+          },
+        ],
       },
     });
 
-    const checkbox = wrapper.find('[data-test="esgf-status"] input');
-    expect((checkbox.element as HTMLInputElement).checked).toBe(false);
+    expect(wrapper.find('[data-test="esgf-count"]').text()).toBe("0/1");
   });
 
   it("renders all detail fields in the panel", async () => {

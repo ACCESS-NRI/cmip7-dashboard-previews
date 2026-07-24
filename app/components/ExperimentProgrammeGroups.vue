@@ -430,8 +430,14 @@ function formatNumber(value: number): string {
                     test-id="group-progress"
                   />
 
-                  <div>
-                    <EsgfStatus :published="experiment.esgfPublished">
+                  <!-- self-center rather than relying on the row's items-center:
+                       the name cell can wrap to two lines and the count should
+                       stay on the middle of the row, not ride its top. -->
+                  <div class="flex h-full items-center">
+                    <EsgfStatus
+                      :published-count="experiment.esgfPublishedCount"
+                      :total="experiment.expectedEnsembleCount"
+                    >
                       <!-- The column header labels this on md+; on stacked
                            mobile rows there is no header, so caption inline. -->
                       <span

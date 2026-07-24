@@ -23,6 +23,7 @@ function makeExperiment(
     expectedEnsembleCount: 1,
     members: [],
     esgfPublished: false,
+    esgfPublishedCount: 0,
     experimentClass: EXPERIMENT_CLASSES.historical,
     tiers: [],
     details: {},
@@ -132,11 +133,13 @@ describe("ExperimentProgrammeGroups", () => {
           makeExperiment({
             name: "published",
             esgfPublished: true,
+            esgfPublishedCount: 1,
             tiers: [EXPERIMENT_TIERS.deck],
           }),
           makeExperiment({
             name: "unpublished",
             esgfPublished: false,
+            esgfPublishedCount: 0,
             tiers: [EXPERIMENT_TIERS.deck],
           }),
         ],
@@ -149,13 +152,31 @@ describe("ExperimentProgrammeGroups", () => {
       false,
     );
 
-    const checkboxes = deck
-      .findAll('[data-test="esgf-status"] input[type="checkbox"]')
-      .map((input) => (input.element as HTMLInputElement).checked);
-    expect(checkboxes).toEqual([true, false]);
+    const counts = deck
+      .findAll('[data-test="esgf-count"]')
+      .map((count) => count.text());
+    expect(counts).toEqual(["1/1", "0/1"]);
 
     // One of the two DECK experiments is published.
     expect(deck.text()).toContain("Published");
+  });
+
+  it("counts ESGF publication across the ensemble", async () => {
+    const wrapper = await mountSuspended(ExperimentProgrammeGroups, {
+      props: {
+        experiments: [
+          makeExperiment({
+            name: "esm-historical",
+            expectedEnsembleCount: 30,
+            esgfPublished: false,
+            esgfPublishedCount: 0,
+            tiers: [EXPERIMENT_TIERS.deck],
+          }),
+        ],
+      },
+    });
+
+    expect(wrapper.find('[data-test="esgf-count"]').text()).toBe("0/30");
   });
 
   it("renders experiment type badges in their own column", async () => {

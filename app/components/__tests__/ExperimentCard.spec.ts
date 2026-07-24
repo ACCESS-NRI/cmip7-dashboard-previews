@@ -27,6 +27,7 @@ function makeExperiment(
     expectedEnsembleCount: 1,
     members: [],
     esgfPublished: false,
+    esgfPublishedCount: 0,
     experimentClass: EXPERIMENT_CLASSES.historical,
     tiers: [],
     details: { experiment_name: "historical", experiment_service_units: 100 },

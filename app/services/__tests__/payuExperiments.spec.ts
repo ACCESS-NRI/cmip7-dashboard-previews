@@ -110,6 +110,18 @@ describe("normalizePayuExperiment", () => {
     const result = normalizePayuExperiment(BASE_CONFIG, [BASE_PAYU]);
     expect(result.expectedYearsRun).toBe(300);
     expect(result.esgfPublished).toBe(false);
+    expect(result.esgfPublishedCount).toBe(0);
+  });
+
+  it("counts the whole ensemble as published when the config says so", () => {
+    // The config records publication once for the experiment, so the count is
+    // all-or-nothing until it grows a per-member flag.
+    const result = normalizePayuExperiment(
+      { ...BASE_CONFIG, esgf_published: true, expected_n_ensembles: 10 },
+      [BASE_PAYU],
+    );
+    expect(result.esgfPublishedCount).toBe(10);
+    expect(result.expectedEnsembleCount).toBe(10);
   });
 
   it("resolves the experiment class from the config class field", () => {

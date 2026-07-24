@@ -70,6 +70,12 @@ export interface PayuExperiment {
    */
   members: PayuExperimentMember[];
   esgfPublished: boolean | null;
+  /**
+   * Ensemble members published to ESGF. The config records publication once for
+   * the whole experiment, so this is all-or-nothing until it carries a per-
+   * member flag; the count is what the dashboard displays either way.
+   */
+  esgfPublishedCount: number;
   /** Resolved scientific taxonomy class (issue #14), from the config `class`. */
   experimentClass: ExperimentClass;
   /**
@@ -195,6 +201,7 @@ export function normalizePayuExperiment(
     expectedEnsembleCount,
     members,
     esgfPublished: configEntry.esgf_published ?? null,
+    esgfPublishedCount: configEntry.esgf_published ? expectedEnsembleCount : 0,
     experimentClass: resolveExperimentClass(configEntry.class),
     tiers: experimentTiers({ deck: configEntry.deck, aft: configEntry.aft }),
     details: soleMember?.details ?? {},
