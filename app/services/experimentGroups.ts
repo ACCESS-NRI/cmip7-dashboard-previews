@@ -63,7 +63,11 @@ export function summarizeExperimentGroup(
     if (experiment.expectedYearsRun !== null) {
       plannedYears += experiment.expectedYearsRun;
     }
-    if (experiment.esgfPublished === true) published += 1;
+    // Counts whole experiments, so an ensemble lands here only once every one
+    // of its members is on ESGF.
+    if (experiment.esgfPublishedCount >= experiment.expectedEnsembleCount) {
+      published += 1;
+    }
 
     const status = experimentRunStatus(experiment);
     if (status === "completed") completed += 1;

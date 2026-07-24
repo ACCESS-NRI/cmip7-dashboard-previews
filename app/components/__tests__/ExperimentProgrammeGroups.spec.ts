@@ -22,7 +22,6 @@ function makeExperiment(
     memberExpectedYearsRun: 100,
     expectedEnsembleCount: 1,
     members: [],
-    esgfPublished: false,
     esgfPublishedCount: 0,
     experimentClass: EXPERIMENT_CLASSES.historical,
     tiers: [],
@@ -132,13 +131,11 @@ describe("ExperimentProgrammeGroups", () => {
         experiments: [
           makeExperiment({
             name: "published",
-            esgfPublished: true,
             esgfPublishedCount: 1,
             tiers: [EXPERIMENT_TIERS.deck],
           }),
           makeExperiment({
             name: "unpublished",
-            esgfPublished: false,
             esgfPublishedCount: 0,
             tiers: [EXPERIMENT_TIERS.deck],
           }),
@@ -168,7 +165,6 @@ describe("ExperimentProgrammeGroups", () => {
           makeExperiment({
             name: "esm-historical",
             expectedEnsembleCount: 30,
-            esgfPublished: false,
             esgfPublishedCount: 0,
             tiers: [EXPERIMENT_TIERS.deck],
           }),

@@ -24,7 +24,6 @@ function makeExperiment(
     memberExpectedYearsRun: 100,
     expectedEnsembleCount: 1,
     members: [],
-    esgfPublished: false,
     esgfPublishedCount: 0,
     experimentClass: EXPERIMENT_CLASSES.historical,
     tiers: [],
@@ -83,7 +82,7 @@ describe("summarizeExperimentGroup", () => {
       makeExperiment({
         yearsRun: 100,
         expectedYearsRun: 100,
-        esgfPublished: true,
+        esgfPublishedCount: 1,
       }),
       makeExperiment({ yearsRun: 25, expectedYearsRun: 100 }),
       makeExperiment({ yearsRun: 0, expectedYearsRun: 100 }),

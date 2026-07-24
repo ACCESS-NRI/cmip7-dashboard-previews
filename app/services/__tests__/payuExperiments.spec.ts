@@ -6,6 +6,7 @@ import {
   loadPayuExperiments,
   normalizePayuExperiment,
   calculateYearsRun,
+  esgfPublishedCount,
 } from "../payuExperiments";
 import type { PayuExperimentRaw } from "../payuExperiments";
 import type { ExperimentConfig } from "../experimentConfig";
@@ -64,13 +65,35 @@ describe("calculateYearsRun", () => {
   });
 });
 
+describe("esgfPublishedCount", () => {
+  it("reads a count straight through", () => {
+    expect(esgfPublishedCount(4, 10)).toBe(4);
+    expect(esgfPublishedCount(0, 10)).toBe(0);
+  });
+
+  it("reads legacy booleans as all or nothing", () => {
+    expect(esgfPublishedCount(true, 10)).toBe(10);
+    expect(esgfPublishedCount(false, 10)).toBe(0);
+  });
+
+  it("treats an absent field as nothing published", () => {
+    expect(esgfPublishedCount(undefined, 10)).toBe(0);
+  });
+
+  it("clamps a count that overshoots the planned ensemble", () => {
+    // Better a wrong-looking 10/10 than an impossible 12/10.
+    expect(esgfPublishedCount(12, 10)).toBe(10);
+    expect(esgfPublishedCount(-1, 10)).toBe(0);
+  });
+});
+
 describe("normalizePayuExperiment", () => {
   const BASE_CONFIG: ExperimentConfig = {
     uuid: "abc-123",
     name: "test-run",
     description: "Test experiment",
     expected_years_run: 300,
-    esgf_published: false,
+    esgf_published: 0,
   };
 
   const BASE_PAYU: PayuExperimentRaw = {
@@ -106,21 +129,18 @@ describe("normalizePayuExperiment", () => {
     expect(result.details).toEqual({});
   });
 
-  it("uses config for expectedYearsRun and esgfPublished", () => {
+  it("uses config for expectedYearsRun and the ESGF count", () => {
     const result = normalizePayuExperiment(BASE_CONFIG, [BASE_PAYU]);
     expect(result.expectedYearsRun).toBe(300);
-    expect(result.esgfPublished).toBe(false);
     expect(result.esgfPublishedCount).toBe(0);
   });
 
-  it("counts the whole ensemble as published when the config says so", () => {
-    // The config records publication once for the experiment, so the count is
-    // all-or-nothing until it grows a per-member flag.
+  it("takes a partial ESGF count from the config", () => {
     const result = normalizePayuExperiment(
-      { ...BASE_CONFIG, esgf_published: true, expected_n_ensembles: 10 },
+      { ...BASE_CONFIG, esgf_published: 4, expected_n_ensembles: 10 },
       [BASE_PAYU],
     );
-    expect(result.esgfPublishedCount).toBe(10);
+    expect(result.esgfPublishedCount).toBe(4);
     expect(result.expectedEnsembleCount).toBe(10);
   });
 

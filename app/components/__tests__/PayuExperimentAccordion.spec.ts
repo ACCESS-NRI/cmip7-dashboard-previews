@@ -18,7 +18,6 @@ const MOCK_EXPERIMENTS: PayuExperiment[] = [
     memberExpectedYearsRun: 500,
     expectedEnsembleCount: 1,
     members: [],
-    esgfPublished: false,
     esgfPublishedCount: 0,
     experimentClass: EXPERIMENT_CLASSES.idealised,
     tiers: [],
@@ -42,7 +41,6 @@ const MOCK_EXPERIMENTS: PayuExperiment[] = [
     memberExpectedYearsRun: 500,
     expectedEnsembleCount: 1,
     members: [],
-    esgfPublished: true,
     esgfPublishedCount: 1,
     experimentClass: EXPERIMENT_CLASSES.baseline,
     tiers: [],
@@ -102,7 +100,6 @@ describe("PayuExperimentAccordion", () => {
           {
             ...MOCK_EXPERIMENTS[0]!,
             expectedEnsembleCount: 10,
-            esgfPublished: true,
             esgfPublishedCount: 10,
           },
         ],
@@ -112,29 +109,12 @@ describe("PayuExperimentAccordion", () => {
     expect(wrapper.find('[data-test="esgf-count"]').text()).toBe("10/10");
   });
 
-  it("shows none published when esgfPublished is false", async () => {
+  it("shows none published when nothing has been published", async () => {
     const wrapper = await mountSuspended(PayuExperimentAccordion, {
       props: {
         experiments: [
           {
             ...MOCK_EXPERIMENTS[0]!,
-            esgfPublished: false,
-            esgfPublishedCount: 0,
-          },
-        ],
-      },
-    });
-
-    expect(wrapper.find('[data-test="esgf-count"]').text()).toBe("0/1");
-  });
-
-  it("shows none published when esgfPublished is null", async () => {
-    const wrapper = await mountSuspended(PayuExperimentAccordion, {
-      props: {
-        experiments: [
-          {
-            ...MOCK_EXPERIMENTS[0]!,
-            esgfPublished: null,
             esgfPublishedCount: 0,
           },
         ],

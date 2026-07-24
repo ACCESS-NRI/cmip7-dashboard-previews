@@ -69,11 +69,10 @@ export interface PayuExperiment {
    * empty for an experiment with no UUID recorded yet.
    */
   members: PayuExperimentMember[];
-  esgfPublished: boolean | null;
   /**
-   * Ensemble members published to ESGF. The config records publication once for
-   * the whole experiment, so this is all-or-nothing until it carries a per-
-   * member flag; the count is what the dashboard displays either way.
+   * Ensemble members published to ESGF, out of `expectedEnsembleCount`. The
+   * single source of truth for publication: a derived "is it published"
+   * boolean alongside it would only drift once a count can be partial.
    */
   esgfPublishedCount: number;
   /** Resolved scientific taxonomy class (issue #14), from the config `class`. */
@@ -156,6 +155,25 @@ export function normalizePayuMember(
   };
 }
 
+/**
+ * Members published to ESGF, from the config's `esgf_published` count. A
+ * boolean is read as the whole ensemble or none of it, and a count beyond the
+ * planned ensemble size is clamped so the column cannot read 12/10.
+ */
+export function esgfPublishedCount(
+  esgfPublished: number | boolean | undefined,
+  expectedEnsembleCount: number,
+): number {
+  if (esgfPublished === undefined) return 0;
+  if (typeof esgfPublished === "boolean") {
+    return esgfPublished ? expectedEnsembleCount : 0;
+  }
+  return Math.min(
+    Math.max(0, Math.round(esgfPublished)),
+    expectedEnsembleCount,
+  );
+}
+
 /** Sum of the members that have a figure; null when none of them do. */
 function sumServiceUnits(members: PayuExperimentMember[]): number | null {
   const reported = members.filter((member) => member.serviceUnits !== null);
@@ -200,8 +218,10 @@ export function normalizePayuExperiment(
     memberExpectedYearsRun,
     expectedEnsembleCount,
     members,
-    esgfPublished: configEntry.esgf_published ?? null,
-    esgfPublishedCount: configEntry.esgf_published ? expectedEnsembleCount : 0,
+    esgfPublishedCount: esgfPublishedCount(
+      configEntry.esgf_published,
+      expectedEnsembleCount,
+    ),
     experimentClass: resolveExperimentClass(configEntry.class),
     tiers: experimentTiers({ deck: configEntry.deck, aft: configEntry.aft }),
     details: soleMember?.details ?? {},
