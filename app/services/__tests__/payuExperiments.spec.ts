@@ -82,13 +82,13 @@ describe("normalizePayuExperiment", () => {
   };
 
   it("uses name from config, not the payu API", () => {
-    const result = normalizePayuExperiment(BASE_CONFIG, BASE_PAYU);
+    const result = normalizePayuExperiment(BASE_CONFIG, [BASE_PAYU]);
     expect(result.name).toBe("test-run");
     expect(result.uuid).toBe("abc-123");
   });
 
   it("uses telemetry from payu when available", () => {
-    const result = normalizePayuExperiment(BASE_CONFIG, BASE_PAYU);
+    const result = normalizePayuExperiment(BASE_CONFIG, [BASE_PAYU]);
     expect(result.modelStartTime).toBe("0101-01-01T00:00:00");
     expect(result.modelCurrentTime).toBe("0275-01-01T00:00:00");
     expect(result.yearsRun).toBe(174);
@@ -97,7 +97,7 @@ describe("normalizePayuExperiment", () => {
   });
 
   it("uses fallback values when payu data is undefined", () => {
-    const result = normalizePayuExperiment(BASE_CONFIG, undefined);
+    const result = normalizePayuExperiment(BASE_CONFIG, []);
     expect(result.modelStartTime).toBe("—");
     expect(result.modelCurrentTime).toBe("—");
     expect(result.yearsRun).toBe(0);
@@ -107,7 +107,7 @@ describe("normalizePayuExperiment", () => {
   });
 
   it("uses config for expectedYearsRun and esgfPublished", () => {
-    const result = normalizePayuExperiment(BASE_CONFIG, BASE_PAYU);
+    const result = normalizePayuExperiment(BASE_CONFIG, [BASE_PAYU]);
     expect(result.expectedYearsRun).toBe(300);
     expect(result.esgfPublished).toBe(false);
   });
@@ -115,14 +115,14 @@ describe("normalizePayuExperiment", () => {
   it("resolves the experiment class from the config class field", () => {
     const result = normalizePayuExperiment(
       { ...BASE_CONFIG, class: "historical" },
-      BASE_PAYU,
+      [BASE_PAYU],
     );
     expect(result.experimentClass.id).toBe("historical");
   });
 
   it("falls back to the idealised class when config declares no class", () => {
     // BASE_CONFIG has no class field.
-    const result = normalizePayuExperiment(BASE_CONFIG, BASE_PAYU);
+    const result = normalizePayuExperiment(BASE_CONFIG, [BASE_PAYU]);
     expect(result.experimentClass.id).toBe("idealised");
     expect(result.experimentClass.isProjection).toBe(false);
   });
@@ -132,8 +132,105 @@ describe("normalizePayuExperiment", () => {
       ...BASE_PAYU,
       some_future_field: "value",
     };
-    const result = normalizePayuExperiment(BASE_CONFIG, payuData);
+    const result = normalizePayuExperiment(BASE_CONFIG, [payuData]);
     expect(result.details).toMatchObject({ some_future_field: "value" });
+  });
+
+  it("treats a single-run experiment as an ensemble of one", () => {
+    const result = normalizePayuExperiment(BASE_CONFIG, [BASE_PAYU]);
+    expect(result.expectedEnsembleCount).toBe(1);
+    expect(result.members).toHaveLength(1);
+    expect(result.members[0]!.name).toBe("test-run");
+    expect(result.members[0]!.uuid).toBe("abc-123");
+    expect(result.members[0]!.expectedYearsRun).toBe(300);
+  });
+
+  it("has no members when the config records no UUID", () => {
+    // piControl currently carries only `related_experiments`, which is not yet
+    // interpreted — so there is no run to report telemetry for.
+    const { uuid: _uuid, ...withoutUuid } = BASE_CONFIG;
+    const result = normalizePayuExperiment(withoutUuid, [BASE_PAYU]);
+    expect(result.members).toEqual([]);
+    expect(result.yearsRun).toBe(0);
+    expect(result.details).toEqual({});
+  });
+
+  describe("ensembles", () => {
+    const ENSEMBLE_CONFIG: ExperimentConfig = {
+      name: "historical",
+      expected_years_run: 172,
+      expected_n_ensembles: 3,
+      ensembles: [
+        { name: "r10i1p1f1", uuid: "uuid-10" },
+        { name: "r2i1p1f1", uuid: "uuid-2" },
+        { name: "r1i1p1f1", uuid: "uuid-1" },
+      ],
+    };
+
+    const memberRaw = (
+      uuid: string,
+      currentYear: string,
+      serviceUnits: number,
+    ): PayuExperimentRaw => ({
+      experiment_name: "historical",
+      experiment_uuid: uuid,
+      experiment_model_start_time: "1850-01-01T00:00:00",
+      experiment_model_current_time: `${currentYear}-01-01T00:00:00`,
+      experiment_service_units: serviceUnits,
+    });
+
+    const ENSEMBLE_PAYU = [
+      memberRaw("uuid-1", "1900", 10),
+      memberRaw("uuid-2", "1880", 5),
+    ];
+
+    it("sums years run across every member", () => {
+      const result = normalizePayuExperiment(ENSEMBLE_CONFIG, ENSEMBLE_PAYU);
+      // r1 has run 50 years, r2 30, r10 has no telemetry at all.
+      expect(result.yearsRun).toBe(80);
+      expect(result.members.map((m) => m.yearsRun)).toEqual([50, 30, 0]);
+    });
+
+    it("measures progress against the whole planned ensemble", () => {
+      const result = normalizePayuExperiment(ENSEMBLE_CONFIG, ENSEMBLE_PAYU);
+      expect(result.expectedYearsRun).toBe(516); // 172 × 3
+      expect(result.memberExpectedYearsRun).toBe(172);
+      expect(result.expectedEnsembleCount).toBe(3);
+    });
+
+    it("orders members by realisation number, not lexically", () => {
+      const result = normalizePayuExperiment(ENSEMBLE_CONFIG, ENSEMBLE_PAYU);
+      expect(result.members.map((m) => m.name)).toEqual([
+        "r1i1p1f1",
+        "r2i1p1f1",
+        "r10i1p1f1",
+      ]);
+    });
+
+    it("flags members that have no telemetry yet", () => {
+      const result = normalizePayuExperiment(ENSEMBLE_CONFIG, ENSEMBLE_PAYU);
+      expect(result.members.map((m) => m.hasTelemetry)).toEqual([
+        true,
+        true,
+        false,
+      ]);
+    });
+
+    it("sums service units across members", () => {
+      const result = normalizePayuExperiment(ENSEMBLE_CONFIG, ENSEMBLE_PAYU);
+      expect(result.serviceUnits).toBe(15);
+    });
+
+    it("keeps the planned size when no members have been started", () => {
+      const result = normalizePayuExperiment(
+        { name: "amip", expected_years_run: 43, expected_n_ensembles: 10 },
+        [],
+      );
+      expect(result.members).toEqual([]);
+      expect(result.expectedYearsRun).toBe(430);
+      expect(result.yearsRun).toBe(0);
+      expect(result.serviceUnits).toBe(null);
+    });
   });
 });
 

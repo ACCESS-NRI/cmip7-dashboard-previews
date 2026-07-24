@@ -105,6 +105,7 @@ const isIdealised = computed(() => experimentClass.value.id === "idealised");
       <ExperimentProgress
         :years-run="experiment.yearsRun"
         :expected-years-run="experiment.expectedYearsRun"
+        :ensemble-count="experiment.expectedEnsembleCount"
       />
       <EsgfStatus
         :published="experiment.esgfPublished"
