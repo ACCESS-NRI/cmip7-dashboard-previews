@@ -3,7 +3,10 @@ import { computed, nextTick, ref } from "vue";
 import type { ContentCollectionItem } from "@nuxt/content";
 import type { PayuExperiment } from "~/services/payuExperiments";
 import type { ExperimentGroup } from "~/services/experimentGroups";
-import { groupExperimentsByProgramme } from "~/services/experimentGroups";
+import {
+  groupExperimentsByProgramme,
+  hasEnsemble,
+} from "~/services/experimentGroups";
 
 const props = defineProps<{
   experiments: PayuExperiment[];
@@ -126,11 +129,6 @@ function explainerFor(
  * more than one group, and the copies expand independently.
  */
 const expandedRows = ref<string[]>([]);
-
-/** True when there is an ensemble to fan out to — planned, started, or both. */
-function hasEnsemble(experiment: PayuExperiment): boolean {
-  return experiment.expectedEnsembleCount > 1 || experiment.members.length > 1;
-}
 
 function rowKey(groupId: string, experiment: PayuExperiment): string {
   return `${groupId}-${experiment.uuid || experiment.name}`;

@@ -5,6 +5,7 @@ import type { ExperimentTierId } from "./experimentTier";
 export type ExperimentRunStatus = "completed" | "running" | "not-started";
 export type ExperimentGroupId = "deck" | "scenario" | "other";
 
+/** Group rollup. Every count here is in ensemble members, not experiments. */
 export interface ExperimentGroupSummary {
   total: number;
   completed: number;
@@ -48,9 +49,74 @@ export function experimentProgressPercent(run: RunProgress): number | null {
   return Math.min(100, Math.round((run.yearsRun / run.expectedYearsRun) * 100));
 }
 
+/** True when there is an ensemble to fan out to — planned, started, or both. */
+export function hasEnsemble(experiment: PayuExperiment): boolean {
+  return experiment.expectedEnsembleCount > 1 || experiment.members.length > 1;
+}
+
+/** One experiment's runs, bucketed by status. The buckets sum to `total`. */
+export interface ExperimentRunCounts {
+  total: number;
+  completed: number;
+  running: number;
+  notStarted: number;
+}
+
+/**
+ * How many simulations an experiment is, and how far along each of them is.
+ * A 30-member ensemble is 30 simulations, not one — counting whole experiments
+ * would let 29 finished realisations read as nothing completed.
+ *
+ * The total is the *planned* ensemble size, so members that have not been
+ * created yet still count as outstanding work, matching `expectedYearsRun`
+ * (already the per-member figure times the planned size).
+ *
+ * An experiment that is a single run is counted whole rather than through its
+ * lone member, which keeps two cases right: `piControl`, whose related sub-runs
+ * sum into `yearsRun` but are deliberately absent from `members`, and an
+ * experiment with no UUID recorded, which has no members but is still one
+ * planned run.
+ */
+export function experimentRunCounts(
+  experiment: PayuExperiment,
+): ExperimentRunCounts {
+  const total = Math.max(
+    experiment.expectedEnsembleCount,
+    experiment.members.length,
+  );
+
+  if (!hasEnsemble(experiment)) {
+    const status = experimentRunStatus(experiment);
+    return {
+      total,
+      completed: status === "completed" ? 1 : 0,
+      running: status === "running" ? 1 : 0,
+      notStarted: status === "not-started" ? 1 : 0,
+    };
+  }
+
+  let completed = 0;
+  let running = 0;
+  for (const member of experiment.members) {
+    const status = experimentRunStatus(member);
+    if (status === "completed") completed += 1;
+    if (status === "running") running += 1;
+  }
+
+  return {
+    total,
+    completed,
+    running,
+    // Planned members with no run recorded yet land here too, so the buckets
+    // always add up to the planned ensemble size.
+    notStarted: Math.max(0, total - completed - running),
+  };
+}
+
 export function summarizeExperimentGroup(
   experiments: PayuExperiment[],
 ): ExperimentGroupSummary {
+  let total = 0;
   let completed = 0;
   let running = 0;
   let notStarted = 0;
@@ -63,20 +129,19 @@ export function summarizeExperimentGroup(
     if (experiment.expectedYearsRun !== null) {
       plannedYears += experiment.expectedYearsRun;
     }
-    // Counts whole experiments, so an ensemble lands here only once every one
-    // of its members is on ESGF.
-    if (experiment.esgfPublishedCount >= experiment.expectedEnsembleCount) {
-      published += 1;
-    }
+    // Counted in members, like the status buckets below, so a part-published
+    // ensemble is not rounded away to nothing.
+    published += experiment.esgfPublishedCount;
 
-    const status = experimentRunStatus(experiment);
-    if (status === "completed") completed += 1;
-    if (status === "running") running += 1;
-    if (status === "not-started") notStarted += 1;
+    const counts = experimentRunCounts(experiment);
+    total += counts.total;
+    completed += counts.completed;
+    running += counts.running;
+    notStarted += counts.notStarted;
   }
 
   return {
-    total: experiments.length,
+    total,
     completed,
     running,
     notStarted,
