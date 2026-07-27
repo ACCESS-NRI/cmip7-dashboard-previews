@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import type { PayuExperiment } from "~/services/payuExperiments";
-import { experimentRunStatus } from "~/services/experimentGroups";
+import { experimentRunCounts } from "~/services/experimentGroups";
 
 const props = defineProps<{
   experiments: PayuExperiment[];
@@ -22,15 +22,18 @@ const totals = computed(() => {
   let planned = 0;
   let serviceUnits = 0;
   let completed = 0;
+  let count = 0;
   for (const experiment of props.experiments) {
     done += experiment.yearsRun;
     if (experiment.expectedYearsRun !== null) {
       planned += experiment.expectedYearsRun;
     }
     serviceUnits += experiment.serviceUnits ?? 0;
-    if (experimentRunStatus(experiment) === "completed") {
-      completed += 1;
-    }
+    // Per ensemble member, so the count is on the same footing as the years
+    // above it — a 30-member ensemble is 30 simulations, not one.
+    const counts = experimentRunCounts(experiment);
+    completed += counts.completed;
+    count += counts.total;
   }
   const percent =
     planned > 0 ? Math.min(100, Math.round((done / planned) * 100)) : null;
@@ -41,7 +44,7 @@ const totals = computed(() => {
     serviceUnits,
     completed,
     publishedGb: PUBLISHED_GB,
-    count: props.experiments.length,
+    count,
   };
 });
 
