@@ -14,14 +14,14 @@
 import { TELEMETRY_EVENTS } from "~/services/telemetryEvents";
 
 export function useRoutePageviews() {
-    const { capture } = useTelemetry();
-    const router = useRouter();
+  const { capture } = useTelemetry();
+  const router = useRouter();
 
-    function start() {
-        router.afterEach((to) => {
-            capture(TELEMETRY_EVENTS.pageview, { path: to.fullPath });
-        });
-    }
+  function start() {
+    router.afterEach((to) => {
+      capture(TELEMETRY_EVENTS.pageview, { path: to.fullPath });
+    });
+  }
 
-    return { start };
+  return { start };
 }

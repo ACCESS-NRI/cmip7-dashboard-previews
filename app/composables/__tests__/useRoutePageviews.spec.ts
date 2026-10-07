@@ -7,20 +7,20 @@ const capture = vi.hoisted(() => vi.fn());
 mockNuxtImport("useTelemetry", () => () => ({ capture }));
 
 const afterEachCallbacks = vi.hoisted(
-    () => [] as ((to: { fullPath: string }) => void)[],
+  () => [] as ((to: { fullPath: string }) => void)[],
 );
 mockNuxtImport("useRouter", () => () => ({
-    afterEach: (cb: (to: { fullPath: string }) => void) => {
-        afterEachCallbacks.push(cb);
-    },
+  afterEach: (cb: (to: { fullPath: string }) => void) => {
+    afterEachCallbacks.push(cb);
+  },
 }));
 
 describe("useRoutePageviews", () => {
-    it("captures a pageview with the new path on route change", () => {
-        useRoutePageviews().start();
+  it("captures a pageview with the new path on route change", () => {
+    useRoutePageviews().start();
 
-        afterEachCallbacks[0]({ fullPath: "/glossary" });
+    afterEachCallbacks[0]({ fullPath: "/glossary" });
 
-        expect(capture).toHaveBeenCalledWith("$pageview", { path: "/glossary" });
-    });
+    expect(capture).toHaveBeenCalledWith("$pageview", { path: "/glossary" });
+  });
 });

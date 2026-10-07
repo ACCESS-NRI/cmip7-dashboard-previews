@@ -10,12 +10,12 @@
  * Used by: app/composables/useTelemetry.ts, app/composables/useRoutePageviews.ts
  */
 export const TELEMETRY_EVENTS = {
-    pageview: "$pageview",
+  pageview: "$pageview",
 } as const;
 
 export type TelemetryEvent =
-    (typeof TELEMETRY_EVENTS)[keyof typeof TELEMETRY_EVENTS];
+  (typeof TELEMETRY_EVENTS)[keyof typeof TELEMETRY_EVENTS];
 
 export interface TelemetryProperties {
-    [TELEMETRY_EVENTS.pageview]: { path: string };
+  [TELEMETRY_EVENTS.pageview]: { path: string };
 }

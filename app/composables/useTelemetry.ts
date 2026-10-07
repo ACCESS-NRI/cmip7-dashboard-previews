@@ -1,6 +1,6 @@
 import type {
-    TelemetryEvent,
-    TelemetryProperties,
+  TelemetryEvent,
+  TelemetryProperties,
 } from "~/services/telemetryEvents";
 
 /**
@@ -17,19 +17,19 @@ import type {
  * Used by: app/composables/useRoutePageviews.ts
  */
 export function useTelemetry() {
-    function capture<E extends TelemetryEvent>(
-        event: E,
-        properties?: TelemetryProperties[E],
-    ) {
-        try {
-            const config = useRuntimeConfig();
-            if (!config.public.posthog?.publicKey) return;
+  function capture<E extends TelemetryEvent>(
+    event: E,
+    properties?: TelemetryProperties[E],
+  ) {
+    try {
+      const config = useRuntimeConfig();
+      if (!config.public.posthog?.publicKey) return;
 
-            usePostHog()?.capture(event, properties);
-        } catch {
-            // Analytics must never break the dashboard — swallow and move on.
-        }
+      usePostHog()?.capture(event, properties);
+    } catch {
+      // Analytics must never break the dashboard — swallow and move on.
     }
+  }
 
-    return { capture };
+  return { capture };
 }
